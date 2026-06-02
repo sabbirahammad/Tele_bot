@@ -47,7 +47,8 @@ async def start_services():
 
 async def stop_services():
     await bot.stop()
-    await user.stop()
+    if user.is_connected:
+        await user.stop()
     logging.info("--- All Services Stopped ---")
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ import aiohttp
 import base64
 import urllib.parse
 from pyrogram import Client, filters, enums
+from pyrogram.errors import FloodWait
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, ReplyKeyboardMarkup, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 from database import search_files, get_files_by_channel, get_channel_name_by_id, get_unique_categories, get_channels_by_category, get_all_channels, search_channels_by_keywords, search_categories_by_keywords, is_user_verified, verify_user
 from loader import GPLINKS_API, user, bot
@@ -306,6 +307,7 @@ async def send_search_results(bot, chat_id, page):
 
     results = state["results"]
     query = state["query"]
+    lang = "bn" # Default to bn or fetch from context if available
 
     page_size = 5
     start_idx = page * page_size

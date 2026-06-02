@@ -1,6 +1,7 @@
 import logging
 import asyncio
 import base64
+import sqlite3
 from pyrogram import Client, filters
 import os # os মডিউল ইম্পোর্ট করা হয়েছে
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
