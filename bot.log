@@ -23484,3 +23484,46 @@ task: <Task pending name='Task-6' coro=<Session.ping_worker() running at C:\User
 2026-06-02 20:46:18,567 - pyrogram.connection.connection - INFO - Disconnected
 2026-06-02 20:46:18,567 - pyrogram.session.session - INFO - Session stopped
 2026-06-02 20:46:18,569 - root - INFO - --- All Services Stopped ---
+2026-06-02 23:18:39,860 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-02 23:18:39,916 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-02 23:18:39,920 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-02 23:18:40,586 - pyrogram.session.session - INFO - Session initialized: Layer 158
+2026-06-02 23:18:40,587 - pyrogram.session.session - INFO - Device: CPython 3.14.4 - Pyrogram 2.0.106
+2026-06-02 23:18:40,587 - pyrogram.session.session - INFO - System: Windows 11 (en)
+2026-06-02 23:18:40,587 - pyrogram.session.session - INFO - Session started
+2026-06-02 23:18:40,589 - pyrogram.session.session - INFO - PingTask started
+2026-06-02 23:18:40,769 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("stats_handler") in group 0 from "plugins.admin"
+2026-06-02 23:18:40,769 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("add_channel_handler") in group 0 from "plugins.admin"
+2026-06-02 23:18:40,769 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("sync_channels_handler") in group 0 from "plugins.admin"
+2026-06-02 23:18:40,769 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("del_channel_handler") in group 0 from "plugins.admin"
+2026-06-02 23:18:40,770 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("broadcast_handler") in group 0 from "plugins.admin"
+2026-06-02 23:18:40,771 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("manual_index_command") in group 0 from "plugins.indexer"
+2026-06-02 23:18:41,163 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("search") in group 0 from "plugins.search"
+2026-06-02 23:18:41,164 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("search_pagination_handler") in group 0 from "plugins.search"
+2026-06-02 23:18:41,164 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("fetch_file_handler") in group 0 from "plugins.search"
+2026-06-02 23:18:41,164 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("list_channel_files_handler") in group 0 from "plugins.search"
+2026-06-02 23:18:41,164 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("browse_channels_handler") in group 0 from "plugins.search"
+2026-06-02 23:18:41,165 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("page_categories_callback") in group 0 from "plugins.search"
+2026-06-02 23:18:41,165 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_categories_callback") in group 0 from "plugins.search"
+2026-06-02 23:18:41,165 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_channels_by_category_handler") in group 0 from "plugins.search"
+2026-06-02 23:18:41,166 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_porn_subcat_handler") in group 0 from "plugins.search"
+2026-06-02 23:18:41,166 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_web_subcat_handler") in group 0 from "plugins.search"
+2026-06-02 23:18:41,166 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_web_series_channels_callback") in group 0 from "plugins.search"
+2026-06-02 23:18:41,166 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_movie_channels_callback") in group 0 from "plugins.search"
+2026-06-02 23:18:41,167 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_live_link_channels_callback") in group 0 from "plugins.search"
+2026-06-02 23:18:41,167 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_world_cup_info_callback") in group 0 from "plugins.search"
+2026-06-02 23:18:41,167 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_buy_bot_contact_callback") in group 0 from "plugins.search"
+2026-06-02 23:18:41,167 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("return_to_start_menu") in group 0 from "plugins.search"
+2026-06-02 23:18:41,168 - pyrogram.client - INFO - [bot_session] [LOAD] InlineQueryHandler("inline_search_handler") in group 0 from "plugins.search"
+2026-06-02 23:18:41,168 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("no_link_callback") in group 0 from "plugins.search"
+2026-06-02 23:18:41,173 - root - INFO - start.py loaded successfully!
+2026-06-02 23:18:41,174 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("start_handler") in group 0 from "plugins.start"
+2026-06-02 23:18:41,174 - pyrogram.client - INFO - [bot_session] Successfully loaded 25 plugins from "plugins"
+2026-06-02 23:18:41,175 - pyrogram.dispatcher - INFO - Started 12 HandlerTasks
+2026-06-02 23:18:41,625 - root - INFO - --- Bot Client Started ---
+2026-06-02 23:18:41,625 - root - ERROR - STRING_SESSION environment variable not found. User client cannot be started. Auto-indexing and global search features will be disabled.
+2026-06-02 23:30:12,923 - pyrogram.dispatcher - INFO - Stopped 12 HandlerTasks
+2026-06-02 23:30:12,924 - pyrogram.session.session - INFO - PingTask stopped
+2026-06-02 23:30:12,925 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-02 23:30:12,926 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-02 23:30:12,927 - pyrogram.session.session - INFO - Session stopped

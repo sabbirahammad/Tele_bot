@@ -26,16 +26,23 @@ async def start_services():
     await bot.set_bot_commands([
         BotCommand("start", "🚀 বট শুরু করুন"),
         BotCommand("catagory", "📂 সব ক্যাটাগরি"),
+        BotCommand("porn", "🔞 Porn ক্যাটাগরি"), # Added for consistency with search.py
         BotCommand("movie", "🎬 মুভি চ্যানেল"),
         BotCommand("livelink", "🔴 লাইভ লিংক"),
+        BotCommand("series", "📺 Web Series"), # Added for consistency with search.py
         BotCommand("worldcup", "🏆 বিশ্বকাপ আপডেট"),
         BotCommand("apk", "⚽ ফ্যান্টাসি ফুটবল APK"),
         BotCommand("buybot", "🤖 বট কিনুন")
     ])
     
     logging.info("--- Bot Client Started ---")
-    await user.start()
-    logging.info("--- User Client (Your ID) Started ---")
+    if os.getenv("STRING_SESSION"): # Only attempt to start user client if STRING_SESSION is provided
+        await user.start()
+        logging.info("--- User Client (Your ID) Started ---")
+    else:
+        logging.error("STRING_SESSION environment variable not found. User client cannot be started. Auto-indexing and global search features will be disabled.")
+        # If the user client is critical for your bot's core functionality,
+        # you might consider exiting the application here if STRING_SESSION is mandatory.
     await asyncio.Event().wait()
 
 async def stop_services():
