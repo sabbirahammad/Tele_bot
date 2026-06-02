@@ -1,0 +1,51 @@
+import asyncio
+# পাইথন ৩.১২+ এবং বিশেষ করে ৩.১৪ এর জন্য Pyrogram compatibility fix
+try:
+    asyncio.get_event_loop()
+except RuntimeError:
+    asyncio.set_event_loop(asyncio.new_event_loop())
+
+import os
+import logging
+from pyrogram.types import BotCommand
+from database import init_db
+from loader import bot, user
+
+# লগিং সেটআপ
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.FileHandler("bot.log"), logging.StreamHandler()]
+)
+
+async def start_services():
+    init_db()
+    await bot.start()
+    
+    # বটের মেনু বাটন সেট করা যাতে ইউজার শুরুতেই ফিচারগুলো দেখতে পায়
+    await bot.set_bot_commands([
+        BotCommand("start", "🚀 বট শুরু করুন"),
+        BotCommand("catagory", "📂 সব ক্যাটাগরি"),
+        BotCommand("movie", "🎬 মুভি চ্যানেল"),
+        BotCommand("livelink", "🔴 লাইভ লিংক"),
+        BotCommand("worldcup", "🏆 বিশ্বকাপ আপডেট"),
+        BotCommand("apk", "⚽ ফ্যান্টাসি ফুটবল APK"),
+        BotCommand("buybot", "🤖 বট কিনুন")
+    ])
+    
+    logging.info("--- Bot Client Started ---")
+    await user.start()
+    logging.info("--- User Client (Your ID) Started ---")
+    await asyncio.Event().wait()
+
+async def stop_services():
+    await bot.stop()
+    await user.stop()
+    logging.info("--- All Services Stopped ---")
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(start_services())
+    except KeyboardInterrupt:
+        loop.run_until_complete(stop_services())
