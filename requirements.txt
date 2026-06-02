@@ -1,4 +1,4 @@
 pyrogram
 python-dotenv
 aiohttp
-tgsnake # For TgCrypto speedup
+tgcrypto
