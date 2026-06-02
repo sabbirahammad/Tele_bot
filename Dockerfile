@@ -16,8 +16,4 @@ COPY . .
 # Create the database directory and ensure it has correct permissions
 RUN mkdir -p /app/database
 
-# The VOLUME instruction is mostly documentation for Railway; 
-# handle persistence via Railway's Volume mounting UI.
-VOLUME ["/app/database"]
-
 CMD ["python", "main.py"]
