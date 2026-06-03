@@ -20,10 +20,14 @@ bot = Client(
     plugins=dict(root="plugins")
 )
 
+# সেশন স্ট্রিং ক্লিনআপ (অতিরিক্ত স্পেস বা নিউলাইন রিমুভ করা)
+RAW_SESSION = os.getenv("STRING_SESSION")
+CLEAN_SESSION = RAW_SESSION.strip().replace('"', '').replace("'", "") if RAW_SESSION and RAW_SESSION.strip() else None
+
 # User Client: আপনার জয়েন করা চ্যানেলের ফাইল ইনডেক্স করার জন্য
 user = Client(
     name="user_session",
-    session_string=os.getenv("STRING_SESSION"), # সেশন স্ট্রিং প্যারামিটার ব্যবহার করা হলো
+    session_string=CLEAN_SESSION, 
     api_id=API_ID,
     api_hash=API_HASH
 )

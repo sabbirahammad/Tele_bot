@@ -24015,3 +24015,185 @@ KeyError: 'gplinks_error'
 2026-06-03 10:38:05,185 - pyrogram.connection.connection - INFO - Disconnected
 2026-06-03 10:38:05,185 - pyrogram.session.session - INFO - Session stopped
 2026-06-03 10:38:05,186 - root - INFO - --- All Services Stopped ---
+2026-06-03 12:08:55,144 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:08:55,448 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:08:55,450 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:08:58,715 - pyrogram.session.session - INFO - Session initialized: Layer 158
+2026-06-03 12:08:58,715 - pyrogram.session.session - INFO - Device: CPython 3.14.4 - Pyrogram 2.0.106
+2026-06-03 12:08:58,716 - pyrogram.session.session - INFO - System: Windows 11 (en)
+2026-06-03 12:08:58,716 - pyrogram.session.session - INFO - Session started
+2026-06-03 12:08:58,718 - pyrogram.session.session - INFO - PingTask started
+2026-06-03 12:09:00,861 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("stats_handler") in group 0 from "plugins.admin"
+2026-06-03 12:09:00,861 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("add_channel_handler") in group 0 from "plugins.admin"
+2026-06-03 12:09:00,861 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("sync_channels_handler") in group 0 from "plugins.admin"
+2026-06-03 12:09:00,862 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("del_channel_handler") in group 0 from "plugins.admin"
+2026-06-03 12:09:00,862 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("broadcast_handler") in group 0 from "plugins.admin"
+2026-06-03 12:09:00,866 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("manual_index_command") in group 0 from "plugins.indexer"
+2026-06-03 12:09:01,974 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("search") in group 0 from "plugins.search"
+2026-06-03 12:09:01,975 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("search_pagination_handler") in group 0 from "plugins.search"
+2026-06-03 12:09:01,975 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("fetch_file_handler") in group 0 from "plugins.search"
+2026-06-03 12:09:01,976 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("list_channel_files_handler") in group 0 from "plugins.search"
+2026-06-03 12:09:01,977 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("browse_channels_handler") in group 0 from "plugins.search"
+2026-06-03 12:09:01,977 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("page_categories_callback") in group 0 from "plugins.search"
+2026-06-03 12:09:01,977 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_categories_callback") in group 0 from "plugins.search"
+2026-06-03 12:09:01,978 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_channels_by_category_handler") in group 0 from "plugins.search"
+2026-06-03 12:09:01,978 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_porn_subcat_handler") in group 0 from "plugins.search"
+2026-06-03 12:09:01,978 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_web_subcat_handler") in group 0 from "plugins.search"
+2026-06-03 12:09:01,979 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_web_series_channels_callback") in group 0 from "plugins.search"
+2026-06-03 12:09:01,979 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_movie_channels_callback") in group 0 from "plugins.search"
+2026-06-03 12:09:01,979 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_live_link_channels_callback") in group 0 from "plugins.search"
+2026-06-03 12:09:01,980 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_world_cup_info_callback") in group 0 from "plugins.search"
+2026-06-03 12:09:01,980 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("show_buy_bot_contact_callback") in group 0 from "plugins.search"
+2026-06-03 12:09:01,981 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("return_to_start_menu") in group 0 from "plugins.search"
+2026-06-03 12:09:01,981 - pyrogram.client - INFO - [bot_session] [LOAD] InlineQueryHandler("inline_search_handler") in group 0 from "plugins.search"
+2026-06-03 12:09:01,982 - pyrogram.client - INFO - [bot_session] [LOAD] CallbackQueryHandler("no_link_callback") in group 0 from "plugins.search"
+2026-06-03 12:09:01,984 - root - INFO - start.py loaded successfully!
+2026-06-03 12:09:01,985 - pyrogram.client - INFO - [bot_session] [LOAD] MessageHandler("start_handler") in group 0 from "plugins.start"
+2026-06-03 12:09:01,985 - pyrogram.client - INFO - [bot_session] Successfully loaded 25 plugins from "plugins"
+2026-06-03 12:09:01,986 - pyrogram.dispatcher - INFO - Started 12 HandlerTasks
+2026-06-03 12:09:02,783 - root - INFO - --- Bot Client Started ---
+2026-06-03 12:09:02,942 - root - WARNING - Global search and auto-indexing are DISABLED.
+2026-06-03 12:14:45,985 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:14:45,993 - pyrogram.session.session - INFO - PingTask stopped
+2026-06-03 12:14:45,994 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:14:45,995 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:14:45,996 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:14:46,964 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:14:46,966 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:14:48,971 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:14:48,971 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:14:48,971 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:14:48,972 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:14:49,612 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:14:49,614 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:14:51,616 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:14:51,617 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:14:51,617 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:14:51,618 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:14:55,059 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:14:55,059 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:14:57,068 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:14:57,068 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:14:57,069 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:14:57,069 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:14:57,540 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:14:57,543 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:14:59,558 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:14:59,559 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:14:59,559 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:14:59,560 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:15:00,677 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:15:00,680 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:15:02,697 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:15:02,698 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:15:02,698 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:15:02,699 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:15:03,926 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:15:03,930 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:15:07,014 - pyrogram.session.session - INFO - Session initialized: Layer 158
+2026-06-03 12:15:07,015 - pyrogram.session.session - INFO - Device: CPython 3.14.4 - Pyrogram 2.0.106
+2026-06-03 12:15:07,015 - pyrogram.session.session - INFO - System: Windows 11 (en)
+2026-06-03 12:15:07,016 - pyrogram.session.session - INFO - Session started
+2026-06-03 12:15:07,016 - pyrogram.session.session - INFO - PingTask started
+2026-06-03 12:15:33,533 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:15:33,533 - pyrogram.session.session - INFO - PingTask stopped
+2026-06-03 12:15:33,534 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:15:33,534 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:15:33,535 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:15:34,709 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:15:34,711 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:15:36,713 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:15:36,713 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:15:36,714 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:15:36,714 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:15:37,683 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:15:37,685 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:15:39,694 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:15:39,694 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:15:39,694 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:15:39,695 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:15:40,170 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:15:40,171 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:15:42,188 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:15:42,189 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:15:42,189 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:15:42,189 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:15:43,444 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:15:43,447 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:15:45,458 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:15:45,459 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:15:45,459 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:15:45,460 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:15:45,922 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:15:45,925 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:15:47,930 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:15:47,930 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:15:47,930 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:15:47,931 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:15:48,251 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:15:48,251 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:15:51,412 - pyrogram.session.session - INFO - Session initialized: Layer 158
+2026-06-03 12:15:51,414 - pyrogram.session.session - INFO - Device: CPython 3.14.4 - Pyrogram 2.0.106
+2026-06-03 12:15:51,414 - pyrogram.session.session - INFO - System: Windows 11 (en)
+2026-06-03 12:15:51,414 - pyrogram.session.session - INFO - Session started
+2026-06-03 12:15:51,415 - pyrogram.session.session - INFO - PingTask started
+2026-06-03 12:16:23,333 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:16:23,334 - pyrogram.session.session - INFO - PingTask stopped
+2026-06-03 12:16:23,334 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:16:23,334 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:16:23,335 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:16:24,181 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:16:24,182 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:16:26,192 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:16:26,192 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:16:26,193 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:16:26,193 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:16:26,971 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:16:26,971 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:16:28,988 - pyrogram.session.session - INFO - NetworkTask stopped
+2026-06-03 12:16:28,988 - pyrogram.connection.connection - INFO - Disconnected
+2026-06-03 12:16:28,988 - pyrogram.session.session - INFO - Session stopped
+2026-06-03 12:16:28,989 - pyrogram.connection.connection - INFO - Connecting...
+2026-06-03 12:16:29,681 - pyrogram.connection.connection - INFO - Connected! Production DC5 - IPv4
+2026-06-03 12:16:29,682 - pyrogram.session.session - INFO - NetworkTask started
+2026-06-03 12:16:32,456 - pyrogram.session.session - INFO - Session initialized: Layer 158
+2026-06-03 12:16:32,456 - pyrogram.session.session - INFO - Device: CPython 3.14.4 - Pyrogram 2.0.106
+2026-06-03 12:16:32,456 - pyrogram.session.session - INFO - System: Windows 11 (en)
+2026-06-03 12:16:32,457 - pyrogram.session.session - INFO - Session started
+2026-06-03 12:16:32,457 - pyrogram.session.session - INFO - PingTask started
+2026-06-03 12:22:00,483 - pyrogram.session.session - WARNING - [bot_session] Waiting for 6 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:03,218 - pyrogram.session.session - WARNING - [bot_session] Waiting for 3 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:03,501 - pyrogram.session.session - WARNING - [bot_session] Waiting for 3 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:04,162 - pyrogram.session.session - WARNING - [bot_session] Waiting for 3 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:08,631 - pyrogram.session.session - WARNING - [bot_session] Waiting for 10 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:11,106 - pyrogram.session.session - WARNING - [bot_session] Waiting for 7 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:11,568 - pyrogram.session.session - WARNING - [bot_session] Waiting for 7 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:12,224 - pyrogram.session.session - WARNING - [bot_session] Waiting for 6 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:21,422 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:21,568 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:24,289 - pyrogram.session.session - WARNING - [bot_session] Waiting for 5 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:24,663 - pyrogram.session.session - WARNING - [bot_session] Waiting for 5 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:31,948 - pyrogram.session.session - WARNING - [bot_session] Waiting for 9 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:32,155 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:32,275 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:32,590 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:43,984 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:43,985 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:43,988 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:43,989 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:53,473 - pyrogram.session.session - WARNING - [bot_session] Waiting for 10 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:54,827 - pyrogram.session.session - WARNING - [bot_session] Waiting for 9 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:54,950 - pyrogram.session.session - WARNING - [bot_session] Waiting for 9 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:22:55,146 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:23:05,113 - pyrogram.session.session - WARNING - [bot_session] Waiting for 9 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:23:06,038 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:23:06,239 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:23:06,612 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:23:16,133 - pyrogram.session.session - WARNING - [bot_session] Waiting for 9 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:23:17,082 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:23:17,131 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:23:17,191 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:23:26,387 - pyrogram.session.session - WARNING - [bot_session] Waiting for 10 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:23:27,811 - pyrogram.session.session - WARNING - [bot_session] Waiting for 9 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:23:27,938 - pyrogram.session.session - WARNING - [bot_session] Waiting for 9 seconds before continuing (required by "users.GetFullUser")
+2026-06-03 12:23:28,186 - pyrogram.session.session - WARNING - [bot_session] Waiting for 8 seconds before continuing (required by "users.GetFullUser")

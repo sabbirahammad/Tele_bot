@@ -36,10 +36,14 @@ async def start_services():
     ])
     
     logging.info("--- Bot Client Started ---")
-    string_session = os.getenv("STRING_SESSION")
-    if string_session: 
-        await user.start()
-        logging.info("--- User Client (Your ID) Started ---")
+    # সেশন স্ট্রিং অন্তত ৩০০ ক্যারেক্টার হওয়া উচিত (Pyrogram v2 এর জন্য)
+    if user.session_string and len(user.session_string) > 300: 
+        try:
+            await user.start()
+            logging.info("--- User Client (Your ID) Started ---")
+        except Exception as e:
+            logging.error(f"❌ User Client failed to start: {str(e)}")
+            logging.warning("Please check if your STRING_SESSION is valid and complete.")
     else:
         logging.warning("⚠️ STRING_SESSION missing! The bot will only work with existing database records.")
         logging.warning("Global search and auto-indexing are DISABLED.")
