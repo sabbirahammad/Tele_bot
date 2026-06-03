@@ -15,83 +15,154 @@ from translation import get_string
 USER_SEARCHES = {}
 logger = logging.getLogger(__name__)
 
+# গ্লোবাল কিউ এবং ট্র্যাকার: একই সাথে একাধিক ক্রলিং প্রসেস সিরিয়াল করার জন্য
+CRAWL_QUEUE = asyncio.Queue()
+QUEUED_QUERIES = set()
+CRAWL_WORKER_TASK = None
+
+async def crawl_worker():
+    """ব্যাকগ্রাউন্ডে কিউ থেকে একটা একটা করে সার্চ কুয়েরি প্রসেস করবে"""
+    while True:
+        query = await CRAWL_QUEUE.get()
+        try:
+            await auto_join_channels(query)
+        except Exception as e:
+            logger.error(f"Error in crawl_worker for query '{query}': {e}")
+        finally:
+            CRAWL_QUEUE.task_done()
+            QUEUED_QUERIES.discard(query)
+
+async def trigger_deep_crawl(query):
+    """সার্চ রেজাল্ট না পেলে এই ফাংশনটি কুয়েরিটাকে কিউতে অ্যাড করে দিবে"""
+    global CRAWL_WORKER_TASK
+    # যদি ওয়ার্কার টাস্ক রান না করা থাকে, তবে স্টার্ট করবে
+    if CRAWL_WORKER_TASK is None or CRAWL_WORKER_TASK.done():
+        CRAWL_WORKER_TASK = asyncio.create_task(crawl_worker())
+    
+    # ডুপ্লিকেট কুয়েরি এড়াতে সেট চেক করা
+    if query not in QUEUED_QUERIES:
+        QUEUED_QUERIES.add(query)
+        await CRAWL_QUEUE.put(query)
+        logger.info(f"Added '{query}' to deep crawl queue. Position in queue: {CRAWL_QUEUE.qsize()}")
+
 async def auto_join_channels(query):
-    """সার্চ রেজাল্ট না পাওয়া গেলে নতুন চ্যানেল খুঁজে জয়েন করার ফাংশন"""
+    """সার্চ রেজাল্ট না পাওয়া গেলে নতুন চ্যানেল খুঁজে জয়েন করার Automated Deep Crawling ফাংশন"""
     from database import add_channel, get_channel_name_by_id
     from plugins.indexer import index_chat_history
     from plugins.admin import ADMINS
+    from plugins.trending_keywords import ALL_TRENDING_SUFFIXES
     
-    count = 0
-    found_any = False
+    # Generate keywords using the 500+ trending suffixes
+    keywords = [f"{query} {suffix}".strip() for suffix in ALL_TRENDING_SUFFIXES]
+    # Remove duplicate combinations (e.g., if query is already empty) while preserving order
+    keywords = list(dict.fromkeys(keywords))
+    
+    total_joined = 0
     joined_chats = set()
+    newly_joined_chat_ids = []
 
     try:
-        logger.info(f"অটো-ডিসকভারি শুরু হয়েছে: {query}")
-        # টেলিগ্রাম গ্লোবাল সার্চ ব্যবহার করে মেসেজ খোঁজা
-        # FloodWait হ্যান্ডেল করার জন্য একটি ছোট বিরতি যোগ করা যেতে পারে
-        try:
-            await asyncio.sleep(1) # গ্লোবাল সার্চ শুরুর আগে সামান্য বিরতি
-        except FloodWait as e:
-            logger.warning(f"FloodWait encountered before global search: {e.value} seconds. Waiting...")
-            await asyncio.sleep(e.value)
-        async for message in user.search_global(query, limit=50):
-            if count >= 5: # একবারে সর্বোচ্চ ৫টি চ্যানেলে জয়েন করবে (Account Safety এর জন্য)
-                break
-            
-            chat = message.chat
-            if not chat or chat.type != enums.ChatType.CHANNEL or chat.id in joined_chats:
-                continue
-
-            found_any = True
-            joined_chats.add(chat.id)
-
-            # যদি চ্যানেলটি আগে থেকে ডাটাবেজে না থাকে
-            if not get_channel_name_by_id(chat.id):
-                try:
-                    logger.info(f"নতুন সোর্স চ্যানেল খুঁজে পাওয়া গেছে: {chat.title} (ID: {chat.id}). জয়েন করার চেষ্টা করছি...")
-                    # join_chat এর আগে FloodWait হ্যান্ডেল করা
-                    try:
-                        await asyncio.sleep(1) # জয়েন করার আগে সামান্য বিরতি
-                    except FloodWait as e:
-                        logger.warning(f"FloodWait encountered before joining chat {chat.id}: {e.value} seconds. Waiting...")
-                        await asyncio.sleep(e.value)
-                    
-                    await user.join_chat(chat.id)
-                    
-                    # Try to get a valid link (Username or Invite Link)
-                    link = f"https://t.me/{chat.username}" if chat.username else chat.invite_link
-                    if not link:
-                        try: link = await user.export_chat_invite_link(chat.id)
-                        except Exception: pass
-                    
-                    add_channel(chat.id, chat.title, link)
-                    # অটোমেটিক ইনডেক্সিং শুরু করা (Background Task)
-                    asyncio.create_task(index_chat_history(chat.id, is_auto=True, query_ref=query))
-                    
-                    # অ্যাডমিনকে জানানো
-                    for admin_id in ADMINS:
-                        try:
-                            await bot.send_message(
-                                admin_id, 
-                                f"📢 **অটো-ডিসকভারি অ্যালার্ট:**\n\n"
-                                f"🔍 ইউজার সার্চ: `{query}`\n"
-                                f"🏷 নাম: {chat.title}\n"
-                                f"🆔 আইডি: `{chat.id}`\n"
-                                f"🔄 ইনডেক্সিং ব্যাকগ্রাউন্ডে শুরু হয়েছে..."
-                            )
-                        except Exception: pass
-                    logger.info(f"সফলভাবে জয়েন করা হয়েছে: {chat.title}")
-                    count += 1
-                    await asyncio.sleep(2) # স্প্যাম এড়াতে বিরতি
-                except Exception:
-                    logger.exception(f"চ্যানেল {chat.title} (ID: {chat.id}) এ জয়েন করতে ব্যর্থ হয়েছে অথবা ইনডেক্সিংয়ে সমস্যা হয়েছে।")
-                    continue
+        logger.info(f"Automated Deep Crawling শুরু হয়েছে: {query} (Checking {len(keywords)} variations)")
         
-        if not found_any:
-            logger.info(f"গ্লোবাল সার্চে '{query}' এর জন্য কোনো চ্যানেল পাওয়া যায়নি।")
+        for keyword in keywords:
+            if total_joined >= 15:
+                break
+                
+            logger.info(f"Searching globally for keyword: {keyword}")
+            
+            try:
+                async for message in user.search_global(keyword, limit=20):
+                    if total_joined >= 15:
+                        break
+                    
+                    chat = message.chat
+                    if not chat or chat.type != enums.ChatType.CHANNEL or chat.id in joined_chats:
+                        continue
+                    
+                    joined_chats.add(chat.id)
+                    
+                    if not get_channel_name_by_id(chat.id):
+                        try:
+                            # Members count check (try to get if not present)
+                            try:
+                                full_chat = await user.get_chat(chat.id)
+                                members_count = full_chat.members_count or 0
+                            except FloodWait as e:
+                                logger.warning(f"FloodWait while getting chat info: {e.value}s")
+                                await asyncio.sleep(e.value)
+                                full_chat = await user.get_chat(chat.id)
+                                members_count = full_chat.members_count or 0
+                            except Exception:
+                                members_count = getattr(chat, 'members_count', 0) or 0
+                                
+                            if members_count <= 100:
+                                logger.info(f"Skipping {chat.title} because members_count ({members_count}) <= 100")
+                                continue
+                                
+                            logger.info(f"নতুন সোর্স চ্যানেল খুঁজে পাওয়া গেছে: {chat.title} (ID: {chat.id}, Members: {members_count}). Joining...")
+                            
+                            try:
+                                await user.join_chat(chat.id)
+                            except FloodWait as e:
+                                logger.warning(f"FloodWait before joining chat {chat.id}: {e.value}s")
+                                await asyncio.sleep(e.value)
+                                await user.join_chat(chat.id)
+                            
+                            link = f"https://t.me/{chat.username}" if chat.username else getattr(chat, 'invite_link', None)
+                            if not link:
+                                try: 
+                                    link = await user.export_chat_invite_link(chat.id)
+                                except FloodWait as e:
+                                    await asyncio.sleep(e.value)
+                                    link = await user.export_chat_invite_link(chat.id)
+                                except Exception: 
+                                    pass
+                            
+                            add_channel(chat.id, chat.title, link)
+                            newly_joined_chat_ids.append(chat.id)
+                            total_joined += 1
+                            
+                            # অ্যাডমিনকে জানানো
+                            for admin_id in ADMINS:
+                                try:
+                                    await bot.send_message(
+                                        admin_id, 
+                                        f"📢 **Deep Crawling অ্যালার্ট:**\n\n"
+                                        f"🔍 কিওয়ার্ড: `{keyword}`\n"
+                                        f"🏷 নাম: {chat.title}\n"
+                                        f"🆔 আইডি: `{chat.id}`\n"
+                                        f"👥 মেম্বার: {members_count}"
+                                    )
+                                except Exception: pass
+                                
+                            logger.info(f"সফলভাবে জয়েন করা হয়েছে: {chat.title}")
+                            await asyncio.sleep(10) # 10 seconds after successful join
+                        except FloodWait as e:
+                            await asyncio.sleep(e.value)
+                        except Exception as e:
+                            logger.exception(f"চ্যানেল {chat.title} (ID: {chat.id}) এ জয়েন করতে ব্যর্থ হয়েছে: {e}")
+                            continue
+            except FloodWait as e:
+                logger.warning(f"FloodWait during search_global: {e.value}s")
+                await asyncio.sleep(e.value)
+            except Exception as e:
+                logger.exception(f"Error in search_global for '{keyword}': {e}")
+                
+            await asyncio.sleep(5) # 5 seconds after every global search query
+
+        # অটোমেটিক ইনডেক্সিং শুরু করা
+        if newly_joined_chat_ids:
+            logger.info(f"Deep crawling finished. Joined {len(newly_joined_chat_ids)} new channels. Starting indexing...")
+            for chat_id in newly_joined_chat_ids:
+                try:
+                    asyncio.create_task(index_chat_history(chat_id, is_auto=True, query_ref=query))
+                except Exception as e:
+                    logger.error(f"Failed to start indexing for {chat_id}: {e}")
+        else:
+            logger.info(f"Deep crawling finished. No new valid channels found for '{query}'.")
             for admin_id in ADMINS:
                 try:
-                    await bot.send_message(admin_id, f"🔍 **অটো-ডিসকভারি রিপোর্ট:**\n\nসার্চ কুয়েরি: `{query}`\nঅবস্থা: টেলিগ্রামে কোনো নতুন সোর্স খুঁজে পাওয়া যায়নি।")
+                    await bot.send_message(admin_id, f"🔍 **Deep Crawling রিপোর্ট:**\n\nসার্চ কুয়েরি: `{query}`\nঅবস্থা: নতুন কোনো চ্যানেল খুঁজে পাওয়া যায়নি বা মেম্বার সংখ্যা ১০০ এর কম।")
                 except Exception: pass
 
     except Exception as e:
@@ -308,7 +379,7 @@ async def search(bot, message):
     # যদি কোনো ফাইল বা সাজেশন কিছুই না পাওয়া যায়
     if not results:
         # ব্যাকগ্রাউন্ডে নতুন চ্যানেল খোঁজা এবং জয়েন করার টাস্ক শুরু করা
-        asyncio.create_task(auto_join_channels(query))
+        await trigger_deep_crawl(query)
         return await wait_msg.edit_text(get_string("no_results", lang))
 
 async def send_search_results(bot, chat_id, page):
