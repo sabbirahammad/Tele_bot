@@ -40,7 +40,7 @@ async def start_services():
         await user.start()
         logging.info("--- User Client (Your ID) Started ---")
     else:
-        logging.error("STRING_SESSION environment variable not found. User client cannot be started. Auto-indexing and global search features will be disabled.")
+        logging.warning("STRING_SESSION environment variable not found. User client cannot be started. Auto-indexing and global search features will be disabled.")
         # If the user client is critical for your bot's core functionality,
         # you might consider exiting the application here if STRING_SESSION is mandatory.
     await asyncio.Event().wait()

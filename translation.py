@@ -22,7 +22,10 @@ STRINGS = {
         "back_main_btn": "⬅️ মূল মেনুতে ফিরে যান",
         "back_cat_btn": "⬅️ ক্যাটাগরি লিস্টে ফিরে যান",
         "download_btn": "📥 ডাউনলোড / দেখুন",
-        "search_results_title": "🔍 **'{query}' এর জন্য মোট {total}টি ভিডিও/ফাইল পাওয়া গেছে।**\n\nপৃষ্ঠা: {page} / {total_pages}"
+        "search_results_title": "🔍 **'{query}' এর জন্য মোট {total}টি ভিডিও/ফাইল পাওয়া গেছে।**\n\nপৃষ্ঠা: {page} / {total_pages}",
+        "gplinks_error": "⚠️ লিংক তৈরি করতে সমস্যা হচ্ছে, দয়া করে পরে আবার চেষ্টা করুন অথবা অ্যাডমিনকে জানান।",
+        "search_usage": "⚠️ ব্যবহারবিধি: `/search <ফাইলের নাম>`",
+        "apk_download_text": "📥 **APK ডাউনলোড করুন:**\n\nলিংক: [এখানে ক্লিক করুন](https://example.com/apk)"
     },
     "en": {
         "welcome": "👋 Hello {name}!\n\n🚀 I am a powerful file searcher bot.\nSearch for files from categories below or send a message with the file name:",
@@ -47,7 +50,10 @@ STRINGS = {
         "back_main_btn": "⬅️ Return to Main Menu",
         "back_cat_btn": "⬅️ Back to Category List",
         "download_btn": "📥 Download / View",
-        "search_results_title": "🔍 **Found {total} files for '{query}'.**\n\nPage: {page} / {total_pages}"
+        "search_results_title": "🔍 **Found {total} files for '{query}'.**\n\nPage: {page} / {total_pages}",
+        "gplinks_error": "⚠️ Error generating link, please try again later or contact admin.",
+        "search_usage": "⚠️ Usage: `/search <file name>`",
+        "apk_download_text": "📥 **Download APK:**\n\nLink: [Click Here](https://example.com/apk)"
     }
 }
 
