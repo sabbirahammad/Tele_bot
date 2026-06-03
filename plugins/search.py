@@ -189,7 +189,11 @@ async def search(bot, message):
         return await show_movie_channels_handler(bot, message)
     elif query in [get_string("live_btn", lang), "/livelink"]:
         return await show_live_link_channels_handler(bot, message)
-    
+    elif query in [get_string("series_btn", lang), "/series"]:
+        return await show_web_series_channels_handler(bot, message)
+    elif query in [get_string("porn_btn", lang), "/porn"]:
+        return await show_porn_categories_from_message(bot, message)
+
     wait_msg = await message.reply_text(get_string("searching", lang))
     results = search_files(query)
     
@@ -943,3 +947,13 @@ async def inline_search_handler(bot: Client, query: InlineQuery):
 @Client.on_callback_query(filters.regex(r"^no_link$"))
 async def no_link_callback(bot: Client, cb: CallbackQuery):
     await cb.answer("এই চ্যানেলটির ইনভাইট লিংক যুক্ত করা হয়নি বা এটি একটি প্রাইভেট চ্যানেল।", show_alert=True)
+
+@Client.on_callback_query(filters.regex(r"^help_data$"))
+async def help_callback_handler(bot: Client, cb: CallbackQuery):
+    help_text = (
+        "🛠 **বট সহায়তা কেন্দ্র**\n\n"
+        "১. ফাইল খুঁজতে সরাসরি মুভির নাম লিখে মেসেজ দিন।\n"
+        "২. ক্যাটাগরি বাটনে ক্লিক করে নির্দিষ্ট চ্যানেলে জয়েন করতে পারেন।\n"
+        "৩. প্রতিদিন প্রথমবার ডাউনলোডের সময় একটি ছোট অ্যাড দেখতে হবে।"
+    )
+    await cb.message.edit_text(help_text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ ফিরে যান", callback_data="start_menu")]]))

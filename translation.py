@@ -23,9 +23,9 @@ STRINGS = {
         "back_cat_btn": "⬅️ ক্যাটাগরি লিস্টে ফিরে যান",
         "download_btn": "📥 ডাউনলোড / দেখুন",
         "search_results_title": "🔍 **'{query}' এর জন্য মোট {total}টি ভিডিও/ফাইল পাওয়া গেছে।**\n\nপৃষ্ঠা: {page} / {total_pages}",
-        "gplinks_error": "⚠️ লিংক তৈরি করতে সমস্যা হচ্ছে, দয়া করে পরে আবার চেষ্টা করুন অথবা অ্যাডমিনকে জানান।",
-        "search_usage": "⚠️ ব্যবহারবিধি: `/search <ফাইলের নাম>`",
-        "apk_download_text": "📥 **APK ডাউনলোড করুন:**\n\nলিংক: [এখানে ক্লিক করুন](https://example.com/apk)"
+        "apk_download_text": "⚽ **ফ্যান্টাসি ফুটবল APK ডাউনলোড করুন:**\n\nনিচের লিঙ্ক থেকে লেটেস্ট ভার্সনটি ডাউনলোড করে নিন।",
+        "gplinks_error": "❌ লিঙ্ক শর্ট করার সময় সমস্যা হয়েছে। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন।",
+        "search_usage": "🔍 **সঠিক ব্যবহার:** `/search [ফাইলের নাম]`"
     },
     "en": {
         "welcome": "👋 Hello {name}!\n\n🚀 I am a powerful file searcher bot.\nSearch for files from categories below or send a message with the file name:",
@@ -51,16 +51,17 @@ STRINGS = {
         "back_cat_btn": "⬅️ Back to Category List",
         "download_btn": "📥 Download / View",
         "search_results_title": "🔍 **Found {total} files for '{query}'.**\n\nPage: {page} / {total_pages}",
-        "gplinks_error": "⚠️ Error generating link, please try again later or contact admin.",
-        "search_usage": "⚠️ Usage: `/search <file name>`",
-        "apk_download_text": "📥 **Download APK:**\n\nLink: [Click Here](https://example.com/apk)"
+        "apk_download_text": "⚽ **Download Fantasy Football APK:**\n\nDownload the latest version from the link below.",
+        "gplinks_error": "❌ Error shortening the link. Please try again later.",
+        "search_usage": "🔍 **Usage:** `/search [file_name]`"
     }
 }
 
 def get_string(key, lang_code, **kwargs):
     # যদি language_code 'bn' হয় তবে বাংলা, নাহলে ডিফল্ট ইংলিশ
     lang = "bn" if lang_code and lang_code.startswith("bn") else "en"
-    text = STRINGS.get(lang).get(key, STRINGS["en"][key])
+    # কী খুঁজে না পেলে কি-টিই রিটার্ন করবে যাতে বট ক্র্যাশ না করে
+    text = STRINGS.get(lang).get(key, STRINGS["en"].get(key, key))
     if kwargs:
         return text.format(**kwargs)
     return text

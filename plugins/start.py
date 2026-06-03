@@ -90,9 +90,15 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
                             bot_me = await bot.get_me()
                             user_me = await user.get_me()
 
+                            # Peer id invalid এরর এড়াতে চ্যাটটি রেজলভ করে নেওয়া হচ্ছে
+                            try:
+                                await user.get_chat(ch_id)
+                            except Exception:
+                                pass
+
                             # User forwards the message and we get the message object directly from the response
                             fwd_msg = await user.forward_messages(
-                                chat_id=bot_me.id,
+                                chat_id=bot_me.username,
                                 from_chat_id=ch_id,
                                 message_ids=msg_id
                             )
