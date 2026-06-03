@@ -81,16 +81,17 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
                                 chat_id=message.chat.id,
                                 from_chat_id=ch_id,
                                 message_id=msg_id
-                            ) # sent_msg সফল হলে সেট হবে
+                            )
                         except Exception as bot_err:
                             logging.warning(f"Bot could not copy message directly: {bot_err}. Trying user fallback...")
                             try:
                                 # 2. Fallback: User client forwards to Bot, then Bot copies to User
                                 from loader import user
-                                bot_me = await bot.get_me()
-                                user_me = await user.get_me()
                                 if not user.is_connected:
                                     await user.start()
+
+                                bot_me = await bot.get_me()
+                                user_me = await user.get_me()
 
                                 # Try to resolve peer or re-join
                                 try:
@@ -104,7 +105,7 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
 
                                 try:
                                     fwd_msg = await user.forward_messages(
-                                        chat_id=bot_me.id,
+                                        chat_id=bot_me.username,
                                         from_chat_id=ch_id,
                                         message_ids=msg_id
                                     )

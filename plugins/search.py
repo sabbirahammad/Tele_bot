@@ -466,25 +466,25 @@ async def fetch_file_handler(bot, cb):
                 chat_id=cb.from_user.id,
                 from_chat_id=ch_id,
                 message_id=msg_id
-            ) # sent_msg সফল হলে সেট হবে
+            )
         except Exception:
             # 2. Fallback: Use User client to copy to bot's DM, then bot copies to user
             from loader import user
-            bot_me = await bot.get_me()
-            user_me = await user.get_me()
-            
             if not user.is_connected:
                 await user.start()
+
+            bot_me = await bot.get_me()
+            user_me = await user.get_me()
 
             # Ensure peer is resolved or re-joined
             try:
                 await user.get_chat(ch_id)
             except Exception as e:
-                logger.warning(f"Peer {ch_id} not resolved, attempting re-join: {e}")
+                logger.warning(f"User client: Peer {ch_id} not resolved, attempting re-join if link available: {e}")
                 link = get_channel_invite_link(ch_id)
                 if link:
                     try: await user.join_chat(link)
-                    except Exception: pass
+                    except Exception as join_err: logger.warning(f"User client failed to join chat {ch_id} with link {link}: {join_err}")
 
             try:
                 fwd_msg = await user.forward_messages(
@@ -500,16 +500,18 @@ async def fetch_file_handler(bot, cb):
             if fwd_msg:
                 fwd_msg_id = fwd_msg.id if not isinstance(fwd_msg, list) else fwd_msg[0].id
             
-            sent_msg = await bot.copy_message(
-                chat_id=cb.from_user.id,
-                from_chat_id=user_me.id,
-                message_id=fwd_msg_id
-            )
+            if fwd_msg_id:
+                sent_msg = await bot.copy_message(
+                    chat_id=cb.from_user.id,
+                    from_chat_id=user_me.id,
+                    message_id=fwd_msg_id
+                )
             
             await bot.delete_messages(chat_id=user_me.id, message_ids=fwd_msg_id)
             
         if sent_msg:
             await cb.answer("✅ ফাইলটি পাঠানো হয়েছে!")
+            # ইউজারকে সতর্কতা মেসেজ পাঠানো
             warning_msg = await bot.send_message(cb.from_user.id, "⏳ **সতর্কতা:** কপিরাইট এড়াতে এই ফাইলটি ১০ মিনিট পর ডিলিট করে দেওয়া হবে।")
             asyncio.create_task(auto_delete_message(sent_msg, 600))
             asyncio.create_task(auto_delete_message(warning_msg, 600))
@@ -517,6 +519,7 @@ async def fetch_file_handler(bot, cb):
             await cb.answer("❌ ফাইলটি পাঠানো সম্ভব হয়নি। চ্যানেলটি হয়তো প্রাইভেট বা ডিলিট হয়ে গেছে।", show_alert=True)
             
     except Exception as e:
+        logger.error(f"Error in fetch_file_handler for user {cb.from_user.id}, channel {ch_id}, message {msg_id}: {e}")
         await cb.answer("❌ ফাইলটি পাঠানো সম্ভব হয়নি। বটটি কি ওই চ্যানেলে অ্যাড করা আছে?", show_alert=True)
 
 @Client.on_callback_query(filters.regex(r"^list_channel_files_"))
