@@ -186,7 +186,8 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
             [get_string("wc_btn", lang), get_string("apk_btn", lang), get_string("buy_btn", lang), get_string("series_btn", lang)]
         ],
         resize_keyboard=True, # বাটনগুলো সাইজ মতো ছোট দেখাবে
-        is_persistent=True    # বাটনগুলো সবসময় ইনপুট ফিল্ডের নিচে থাকবে
+        is_persistent=True,   # বাটনগুলো সবসময় ইনপুট ফিল্ডের নিচে থাকবে
+        input_field_placeholder=get_string("search_placeholder", lang) # টাইপিং বক্সে স্থায়ী নির্দেশিকা
     )
     # Inline keyboard for the initial message (consistent with return_to_start_menu)
     inline_buttons = [

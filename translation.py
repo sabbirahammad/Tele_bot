@@ -25,7 +25,8 @@ STRINGS = {
         "search_results_title": "🔍 **'{query}' এর জন্য মোট {total}টি ভিডিও/ফাইল পাওয়া গেছে।**\n\nপৃষ্ঠা: {page} / {total_pages}",
         "apk_download_text": "⚽ **ফ্যান্টাসি ফুটবল APK ডাউনলোড করুন:**\n\nনিচের লিঙ্ক থেকে লেটেস্ট ভার্সনটি ডাউনলোড করে নিন।",
         "gplinks_error": "❌ লিঙ্ক শর্ট করার সময় সমস্যা হয়েছে। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন।",
-        "search_usage": "🔍 **সঠিক ব্যবহার:** `/search [ফাইলের নাম]`"
+        "search_usage": "🔍 **সঠিক ব্যবহার:** `/search [ফাইলের নাম]`",
+        "search_placeholder": "🔍 মুভি বা ফাইলের নাম এখানে লিখুন..."
     },
     "en": {
         "welcome": "👋 Hello {name}!\n\n🚀 I am a powerful file searcher bot.\nSearch for files from categories below or send a message with the file name:",
@@ -53,7 +54,8 @@ STRINGS = {
         "search_results_title": "🔍 **Found {total} files for '{query}'.**\n\nPage: {page} / {total_pages}",
         "apk_download_text": "⚽ **Download Fantasy Football APK:**\n\nDownload the latest version from the link below.",
         "gplinks_error": "❌ Error shortening the link. Please try again later.",
-        "search_usage": "🔍 **Usage:** `/search [file_name]`"
+        "search_usage": "🔍 **Usage:** `/search [file_name]`",
+        "search_placeholder": "🔍 Type movie or file name here..."
     }
 }
 
