@@ -106,6 +106,24 @@ def init_db():
             END;
         """)
 
+        # ক্যাটাগরি পপুলারিটি ট্র্যাক করার জন্য টেবিল
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS category_stats (
+                category TEXT PRIMARY KEY,
+                click_count INTEGER DEFAULT 0
+            )
+        """)
+        
+        # শুরুতে টপ ক্যাটাগরিগুলোকে কিছু ডিফল্ট ক্লিক দিয়ে উপরে রাখা (একবারই চলবে)
+        cursor.execute("SELECT COUNT(*) FROM category_stats")
+        if cursor.fetchone()[0] == 0:
+            top_cats = [
+                ("Porn", 1000), 
+                ("Web Series", 900), 
+                ("Movie", 800)
+            ]
+            cursor.executemany("INSERT INTO category_stats (category, click_count) VALUES (?, ?)", top_cats)
+
         conn.commit()
     
     # প্রতিবার ডাটাবেজ ইনিশিয়ালাইজ হওয়ার সময় সব চ্যানেলের ক্যাটাগরি পুনরায় চেক করে আপডেট করা হবে
@@ -153,6 +171,26 @@ def verify_user(user_id):
         cursor.execute("UPDATE users SET last_verified_date = ? WHERE user_id = ?", (today, user_id))
         conn.commit()
 
+def increment_category_click(category_name):
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO category_stats (category, click_count) VALUES (?, 1)
+            ON CONFLICT(category) DO UPDATE SET click_count = click_count + 1
+        """, (category_name,))
+        conn.commit()
+
+def get_channel_counts_by_category():
+    """প্রতিটি ক্যাটাগরি/সাব-ক্যাটাগরিতে কতগুলো চ্যানেল আছে তা গণনা করে"""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT category, COUNT(channel_id)
+            FROM channels
+            WHERE invite_link IS NOT NULL AND invite_link != ''
+            GROUP BY category
+        """)
+        return dict(cursor.fetchall())
 def search_files(query):
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
@@ -379,68 +417,106 @@ def add_channel(channel_id, channel_name, invite_link=None, category=None):
 def get_unique_categories():
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT DISTINCT category FROM channels WHERE category IS NOT NULL AND category != '' ORDER BY category")
+        # শুধু ভ্যালিড ক্যাটাগরিগুলো নেওয়া হচ্ছে
+        cursor.execute("SELECT DISTINCT category FROM channels WHERE category IS NOT NULL AND category != '' AND invite_link IS NOT NULL AND invite_link != ''")
         raw_cats = [row[0] for row in cursor.fetchall()]
+
+        # ক্লিক পরিসংখ্যান নেওয়া হচ্ছে
+        cursor.execute("SELECT category, click_count FROM category_stats")
+        stats = dict(cursor.fetchall())
         
         main_cats = set()
         for cat in raw_cats:
-            if cat.startswith("Porn||"):
-                main_cats.add("Porn")
-            elif cat.startswith("Web Series||"):
-                main_cats.add("Web Series")
-            else:
-                main_cats.add(cat)
-                
-        return sorted(list(main_cats))
+            if cat.startswith("Porn||"): main_cats.add("Porn")
+            elif cat.startswith("Web Series||"): main_cats.add("Web Series")
+            else: main_cats.add(cat)
+        
+        # পপুলারিটি অনুযায়ী সর্ট করা
+        final_data = []
+        for main in main_cats:
+            score = stats.get(main, 0)
+            # সাব-ক্যাটাগরির ক্লিকগুলো মেইন ক্যাটাগরির সাথে যোগ করা হচ্ছে
+            if main == "Porn":
+                score += sum(v for k, v in stats.items() if k.startswith("Porn||"))
+            elif main == "Web Series":
+                score += sum(v for k, v in stats.items() if k.startswith("Web Series||"))
+            final_data.append((main, score))
+        
+        final_data.sort(key=lambda x: (-x[1], x[0]))
+        return [x[0] for x in final_data]
 
 def get_porn_subcategories():
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT DISTINCT category FROM channels WHERE category LIKE 'Porn||%'")
+        cursor.execute("SELECT DISTINCT category FROM channels WHERE category LIKE 'Porn||%' AND invite_link IS NOT NULL AND invite_link != ''")
         raw_cats = [row[0] for row in cursor.fetchall()]
+
+        # ক্লিক পরিসংখ্যান
+        cursor.execute("SELECT category, click_count FROM category_stats WHERE category LIKE 'Porn||%'")
+        stats = dict(cursor.fetchall())
         
-        subcats = set()
+        subcats = []
         for cat in raw_cats:
-            parts = cat.split("||")
-            if len(parts) > 1 and parts[1] != "Others":
-                subcats.add(parts[1])
+            parts = cat.split("||", 1) # Split only on the first "||"
+            if len(parts) > 1:
+                subcat_name = parts[1]
+                click_score = stats.get(cat, 0)
+                channel_score = channel_counts.get(cat, 0) # এই সাব-ক্যাটাগরির চ্যানেল সংখ্যা
+                combined_score = click_score + (channel_score * 10)
+                subcats.append((subcat_name, combined_score))
         
+        # পপুলারিটি এবং চ্যানেল সংখ্যা অনুযায়ী সর্ট
+        sorted_subcats_data = sorted(subcats, key=lambda x: (-x[1], x[0]))
+        sorted_subcats = [x[0] for x in sorted_subcats_data]
+
         # Add Others at the end if it exists
         if "Porn||Others" in raw_cats:
-            return sorted(list(subcats)) + ["Others"]
-        return sorted(list(subcats))
+            if "Others" in sorted_subcats: sorted_subcats.remove("Others")
+            return sorted_subcats + ["Others"]
+        return sorted_subcats
+
+
 
 def get_web_series_subcategories():
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT DISTINCT category FROM channels WHERE category LIKE 'Web Series||%'")
+        cursor.execute("SELECT DISTINCT category FROM channels WHERE category LIKE 'Web Series||%' AND invite_link IS NOT NULL AND invite_link != ''")
         raw_cats = [row[0] for row in cursor.fetchall()]
+
+        cursor.execute("SELECT category, click_count FROM category_stats WHERE category LIKE 'Web Series||%'")
+        stats = dict(cursor.fetchall())
         
-        subcats = set()
+        channel_counts = get_channel_counts_by_category() # নতুন: চ্যানেল সংখ্যা নেওয়া হচ্ছে
+        
+        subcats_with_scores = []
         for cat in raw_cats:
-            parts = cat.split("||")
+            parts = cat.split("||", 1)
             if len(parts) > 1:
-                subcats.add(parts[1])
+                subcat_name = parts[1]
+                click_score = stats.get(cat, 0)
+                channel_score = channel_counts.get(cat, 0)
+                combined_score = click_score + (channel_score * 10)
+                subcats_with_scores.append((subcat_name, combined_score))
         
-        return sorted(list(subcats))
+        return [x[0] for x in sorted(subcats_with_scores, key=lambda x: (-x[1], x[0]))]
 
 def get_channels_by_category(category_name, subcategory=None):
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
         if category_name == "Porn" and subcategory:
             full_cat = f"Porn||{subcategory}"
-            cursor.execute("SELECT channel_id, channel_name, invite_link FROM channels WHERE category = ? ORDER BY channel_name", (full_cat,))
+            cursor.execute("SELECT channel_id, channel_name, invite_link FROM channels WHERE category = ? AND invite_link IS NOT NULL AND invite_link != '' ORDER BY channel_name", (full_cat,))
         elif category_name == "Web Series" and subcategory:
             full_cat = f"Web Series||{subcategory}"
-            cursor.execute("SELECT channel_id, channel_name, invite_link FROM channels WHERE category = ? ORDER BY channel_name", (full_cat,))
+            cursor.execute("SELECT channel_id, channel_name, invite_link FROM channels WHERE category = ? AND invite_link IS NOT NULL AND invite_link != '' ORDER BY channel_name", (full_cat,))
         else:
-            cursor.execute("SELECT channel_id, channel_name, invite_link FROM channels WHERE category = ? ORDER BY channel_name", (category_name,))
+            cursor.execute("SELECT channel_id, channel_name, invite_link FROM channels WHERE category = ? AND invite_link IS NOT NULL AND invite_link != '' ORDER BY channel_name", (category_name,))
         return cursor.fetchall()
 
 def search_channels_by_keywords(keywords):
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT channel_id, channel_name, invite_link FROM channels ORDER BY channel_name")
+        cursor.execute("SELECT channel_id, channel_name, invite_link FROM channels WHERE invite_link IS NOT NULL AND invite_link != '' ORDER BY channel_name")
         channels = cursor.fetchall()
         
         matched_channels = []
@@ -456,7 +532,7 @@ def search_channels_by_keywords(keywords):
 def search_categories_by_keywords(keywords):
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT DISTINCT category FROM channels WHERE category IS NOT NULL AND category != ''")
+        cursor.execute("SELECT DISTINCT category FROM channels WHERE category IS NOT NULL AND category != '' AND invite_link IS NOT NULL AND invite_link != ''")
         raw_cats = [row[0] for row in cursor.fetchall()]
         
         main_cats = set()
@@ -487,7 +563,7 @@ def del_channel(channel_id):
 def get_all_channels():
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT channel_id, channel_name, invite_link FROM channels")
+        cursor.execute("SELECT channel_id, channel_name, invite_link FROM channels WHERE invite_link IS NOT NULL AND invite_link != ''")
         return cursor.fetchall()
 
 def count_active_channels():

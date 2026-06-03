@@ -8,7 +8,7 @@ import urllib.parse
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, ReplyKeyboardMarkup, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
-from database import search_files, get_files_by_channel, get_channel_name_by_id, get_unique_categories, get_channels_by_category, get_all_channels, search_channels_by_keywords, search_categories_by_keywords, is_user_verified, verify_user, get_channel_invite_link
+from database import search_files, get_files_by_channel, get_channel_name_by_id, get_unique_categories, get_channels_by_category, get_all_channels, search_channels_by_keywords, search_categories_by_keywords, is_user_verified, verify_user, get_channel_invite_link, increment_category_click
 from loader import GPLINKS_API, user, bot
 from translation import get_string
 # সার্চ রেজাল্ট পেজিনেশন হ্যান্ডেল করার জন্য মেমোরি ক্যাশ
@@ -362,10 +362,8 @@ async def search(bot, message):
                 buttons = []
                 row = []
                 for ch_id, ch_name, invite_link in matched_channels:
-                    if invite_link:
-                        row.append(InlineKeyboardButton(ch_name, url=invite_link))
-                    else:
-                        row.append(InlineKeyboardButton(f"{ch_name} 🔒", callback_data="no_link"))
+                    # Only add channels with invite links
+                    row.append(InlineKeyboardButton(ch_name, url=invite_link))
                     if len(row) == 2:
                         buttons.append(row)
                         row = []
@@ -578,10 +576,8 @@ async def browse_channels_handler(bot, cb):
     buttons = []
     row = []
     for ch_id, ch_name, invite_link in paged_channels:
-        if invite_link:
-            row.append(InlineKeyboardButton(ch_name, url=invite_link))
-        else:
-            row.append(InlineKeyboardButton(f"{ch_name} 🔒", callback_data="no_link"))
+        # Only add channels with invite links
+        row.append(InlineKeyboardButton(ch_name, url=invite_link))
         if len(row) == 4:
             buttons.append(row)
             row = []
@@ -663,6 +659,9 @@ async def show_channels_by_category_handler(bot: Client, cb: CallbackQuery):
 
     category_name = cb.data.split("_", 4)[-1] # Extracts category name from callback_data
     
+    # ক্যাটাগরি পপুলারিটি ট্র্যাক করা হচ্ছে
+    increment_category_click(category_name)
+
     if category_name == "Porn":
         return await show_porn_categories_from_message(bot, cb)
 
@@ -697,10 +696,7 @@ async def show_channels_by_category_handler(bot: Client, cb: CallbackQuery):
     buttons = []
     row = []
     for ch_id, ch_name, invite_link in channels:
-        if invite_link:
-            row.append(InlineKeyboardButton(ch_name, url=invite_link))
-        else:
-            row.append(InlineKeyboardButton(f"{ch_name} 🔒", callback_data="no_link"))
+        row.append(InlineKeyboardButton(ch_name, url=invite_link))
         if len(row) == 2:
             buttons.append(row)
             row = []
@@ -749,6 +745,9 @@ async def show_porn_subcat_handler(bot: Client, cb: CallbackQuery):
         return await send_daily_verification_message(bot, cb.message)
 
     subcategory = cb.data.split("_", 3)[-1]
+    # সাব-ক্যাটাগরি পপুলারিটি ট্র্যাক করা হচ্ছে
+    increment_category_click(f"Porn||{subcategory}")
+
     channels = get_channels_by_category("Porn", subcategory)
     
     if not channels:
@@ -757,10 +756,7 @@ async def show_porn_subcat_handler(bot: Client, cb: CallbackQuery):
     buttons = []
     row = []
     for ch_id, ch_name, invite_link in channels:
-        if invite_link:
-            row.append(InlineKeyboardButton(ch_name, url=invite_link))
-        else:
-            row.append(InlineKeyboardButton(f"{ch_name} 🔒", callback_data="no_link"))
+        row.append(InlineKeyboardButton(ch_name, url=invite_link))
         if len(row) == 2:
             buttons.append(row)
             row = []
@@ -781,6 +777,9 @@ async def show_web_subcat_handler(bot: Client, cb: CallbackQuery):
         return await send_daily_verification_message(bot, cb.message)
 
     subcategory = cb.data.split("_", 3)[-1]
+    # সাব-ক্যাটাগরি পপুলারিটি ট্র্যাক করা হচ্ছে
+    increment_category_click(f"Web Series||{subcategory}")
+
     channels = get_channels_by_category("Web Series", subcategory)
     
     if not channels:
@@ -789,10 +788,7 @@ async def show_web_subcat_handler(bot: Client, cb: CallbackQuery):
     buttons = []
     row = []
     for ch_id, ch_name, invite_link in channels:
-        if invite_link:
-            row.append(InlineKeyboardButton(ch_name, url=invite_link))
-        else:
-            row.append(InlineKeyboardButton(f"{ch_name} 🔒", callback_data="no_link"))
+        row.append(InlineKeyboardButton(ch_name, url=invite_link))
         if len(row) == 2:
             buttons.append(row)
             row = []
@@ -855,10 +851,7 @@ async def show_movie_channels_handler(bot, target):
     buttons = []
     row = []
     for ch_id, ch_name, invite_link in channels:
-        if invite_link:
-            row.append(InlineKeyboardButton(ch_name, url=invite_link))
-        else:
-            row.append(InlineKeyboardButton(f"{ch_name} 🔒", callback_data="no_link"))
+        row.append(InlineKeyboardButton(ch_name, url=invite_link))
         if len(row) == 2:
             buttons.append(row)
             row = []
@@ -894,10 +887,7 @@ async def show_live_link_channels_handler(bot, target):
     buttons = []
     row = []
     for ch_id, ch_name, invite_link in channels:
-        if invite_link:
-            row.append(InlineKeyboardButton(ch_name, url=invite_link))
-        else:
-            row.append(InlineKeyboardButton(f"{ch_name} 🔒", callback_data="no_link"))
+        row.append(InlineKeyboardButton(ch_name, url=invite_link))
         if len(row) == 2:
             buttons.append(row)
             row = []
@@ -931,10 +921,7 @@ async def show_world_cup_info_handler(bot, target):
         text += "নিম্নোক্ত চ্যানেলগুলোতে বিশ্বকাপ সম্পর্কিত তথ্য ও লাইভ লিংক পেতে পারেন:\n"
         row = []
         for ch_id, ch_name, invite_link in channels:
-            if invite_link:
-                row.append(InlineKeyboardButton(ch_name, url=invite_link))
-            else:
-                row.append(InlineKeyboardButton(f"{ch_name} 🔒", callback_data="no_link"))
+            row.append(InlineKeyboardButton(ch_name, url=invite_link))
             if len(row) == 2:
                 buttons.append(row)
                 row = []
