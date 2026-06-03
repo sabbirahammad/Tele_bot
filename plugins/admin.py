@@ -119,3 +119,15 @@ async def broadcast_handler(bot, message):
     await status.edit_text(
         f"✅ ব্রডকাস্ট সম্পন্ন!\n\n🚀 সফল: {success}\n❌ ব্যর্থ: {failed}"
     )
+
+@Client.on_message(filters.command("auto") & filters.user(ADMINS))
+async def auto_crawl_handler(bot, message):
+    if len(message.command) < 2:
+        return await message.reply_text("ব্যবহার: `/auto [keyword]`\nযেমন: `/auto pushpa`")
+    
+    query = message.text.split(None, 1)[1].strip()
+    
+    await message.reply_text(f"✅ **'{query}'** কিওয়ার্ডটি Deep Crawling Queue-তে যুক্ত করা হয়েছে। বট ব্যাকগ্রাউন্ডে চ্যানেল খুঁজে জয়েন এবং ইনডেক্স করা শুরু করবে।")
+    
+    from plugins.search import trigger_deep_crawl
+    await trigger_deep_crawl(query)
