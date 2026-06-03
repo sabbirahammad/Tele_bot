@@ -515,6 +515,13 @@ def get_channel_name_by_id(channel_id):
         result = cursor.fetchone()
         return result[0] if result else None
 
+def get_channel_invite_link(channel_id):
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT invite_link FROM channels WHERE channel_id = ?", (channel_id,))
+        result = cursor.fetchone()
+        return result[0] if result else None
+
 def sync_fts_index():
     """পুরানো ডাটাগুলোকে FTS ইনডেক্সে যুক্ত করার জন্য"""
     with sqlite3.connect(DB_PATH) as conn:

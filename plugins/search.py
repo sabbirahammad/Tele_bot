@@ -8,7 +8,7 @@ import urllib.parse
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, ReplyKeyboardMarkup, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
-from database import search_files, get_files_by_channel, get_channel_name_by_id, get_unique_categories, get_channels_by_category, get_all_channels, search_channels_by_keywords, search_categories_by_keywords, is_user_verified, verify_user
+from database import search_files, get_files_by_channel, get_channel_name_by_id, get_unique_categories, get_channels_by_category, get_all_channels, search_channels_by_keywords, search_categories_by_keywords, is_user_verified, verify_user, get_channel_invite_link
 from loader import GPLINKS_API, user, bot
 from translation import get_string
 # সার্চ রেজাল্ট পেজিনেশন হ্যান্ডেল করার জন্য মেমোরি ক্যাশ
@@ -395,6 +395,21 @@ async def fetch_file_handler(bot, cb):
             bot_me = await bot.get_me()
             user_me = await user.get_me()
             
+            if not user.is_connected:
+                await user.start()
+
+            try:
+                await user.get_chat(ch_id)
+            except Exception:
+                link = get_channel_invite_link(ch_id)
+                if link:
+                    try:
+                        await user.join_chat(link)
+                    except:
+                        pass
+                else:
+                    raise
+
             fwd_msg = await user.forward_messages(
                 chat_id=bot_me.username,
                 from_chat_id=ch_id,
