@@ -55,8 +55,15 @@ async def auto_join_channels(query):
                     except FloodWait as e:
                         logger.warning(f"FloodWait encountered before joining chat {chat.id}: {e.value} seconds. Waiting...")
                         await asyncio.sleep(e.value)
+                    
                     await user.join_chat(chat.id)
-                    link = f"https://t.me/{chat.username}" if chat.username else None
+                    
+                    # Try to get a valid link (Username or Invite Link)
+                    link = f"https://t.me/{chat.username}" if chat.username else chat.invite_link
+                    if not link:
+                        try: link = await user.export_chat_invite_link(chat.id)
+                        except Exception: pass
+                    
                     add_channel(chat.id, chat.title, link)
                     # অটোমেটিক ইনডেক্সিং শুরু করা (Background Task)
                     asyncio.create_task(index_chat_history(chat.id, is_auto=True, query_ref=query))
@@ -398,25 +405,29 @@ async def fetch_file_handler(bot, cb):
             if not user.is_connected:
                 await user.start()
 
+            # Ensure peer is resolved or re-joined
             try:
                 await user.get_chat(ch_id)
-            except Exception:
+            except Exception as e:
+                logger.warning(f"Peer {ch_id} not resolved, attempting re-join: {e}")
                 link = get_channel_invite_link(ch_id)
                 if link:
-                    try:
-                        await user.join_chat(link)
-                    except:
-                        pass
-                else:
-                    raise
+                    try: await user.join_chat(link)
+                    except Exception: pass
 
-            fwd_msg = await user.forward_messages(
-                chat_id=bot_me.username,
-                from_chat_id=ch_id,
-                message_ids=msg_id
-            )
+            try:
+                fwd_msg = await user.forward_messages(
+                    chat_id=bot_me.username,
+                    from_chat_id=ch_id,
+                    message_ids=msg_id
+                )
+            except Exception as e:
+                logger.error(f"User client forward failed: {e}")
+                fwd_msg = None
             
-            fwd_msg_id = fwd_msg.id if hasattr(fwd_msg, "id") else fwd_msg[0].id
+            fwd_msg_id = None
+            if fwd_msg:
+                fwd_msg_id = fwd_msg.id if not isinstance(fwd_msg, list) else fwd_msg[0].id
             
             sent_msg = await bot.copy_message(
                 chat_id=cb.from_user.id,

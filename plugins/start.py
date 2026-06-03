@@ -93,32 +93,24 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
                             if not user.is_connected:
                                 await user.start()
 
+                            # Try to resolve peer or re-join
                             try:
-                                try:
-                                    # Peer id invalid এড়াতে চ্যাটটি রেজলভ করে নেওয়া হচ্ছে।
-                                    await user.get_chat(ch_id)
-                                except Exception:
-                                    # যদি রেজলভ না হয়, ডাটাবেজ থেকে লিংক নিয়ে জয়েন করার চেষ্টা করা হচ্ছে
-                                    link = get_channel_invite_link(ch_id)
-                                    if link:
-                                        try:
-                                            await user.join_chat(link)
-                                            logging.info(f"User client successfully re-joined {ch_id} via link.")
-                                        except Exception as join_err:
-                                            logging.warning(f"User client failed to re-join {ch_id}: {join_err}")
-                                    else:
-                                        raise # কোনো লিংক না থাকলে অরিজিনাল এরর ট্রিগার করবে
+                                await user.get_chat(ch_id)
+                            except Exception as e:
+                                logging.warning(f"Peer {ch_id} invalid, trying re-join: {e}")
+                                link = get_channel_invite_link(ch_id)
+                                if link:
+                                    try: await user.join_chat(link)
+                                    except Exception: pass
 
-                                # User forwards the message and we get the message object directly from the response
+                            try:
                                 fwd_msg = await user.forward_messages(
                                     chat_id=bot_me.username,
                                     from_chat_id=ch_id,
                                     message_ids=msg_id
                                 )
                             except Exception as e:
-                                logging.warning(f"User client failed to access or forward from channel {ch_id}: {e}")
-                                # যদি ইউজার ক্লায়েন্ট অ্যাক্সেস বা ফরোয়ার্ড করতে না পারে, তবে fwd_msg None থাকবে।
-                                # এর ফলে sent_msg None থাকবে এবং "ফাইলটি পাওয়া যায়নি" মেসেজটি দেখানো হবে।
+                                logging.error(f"Forward failed: {e}")
                                 fwd_msg = None
                             
                             fwd_msg_id = None
