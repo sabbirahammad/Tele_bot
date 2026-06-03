@@ -455,6 +455,8 @@ def get_porn_subcategories():
         cursor.execute("SELECT category, click_count FROM category_stats WHERE category LIKE 'Porn||%'")
         stats = dict(cursor.fetchall())
         
+        channel_counts = get_channel_counts_by_category() # চ্যানেল সংখ্যা গণনার জন্য এটি প্রয়োজন
+        
         subcats = []
         for cat in raw_cats:
             parts = cat.split("||", 1) # Split only on the first "||"
