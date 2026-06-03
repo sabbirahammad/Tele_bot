@@ -22,7 +22,8 @@ bot = Client(
 
 # User Client: আপনার জয়েন করা চ্যানেলের ফাইল ইনডেক্স করার জন্য
 user = Client(
-    os.getenv("STRING_SESSION", "user_session"), # সেশন স্ট্রিং থাকলে সেটি ব্যবহার করবে
+    name="user_session",
+    session_string=os.getenv("STRING_SESSION"), # সেশন স্ট্রিং প্যারামিটার ব্যবহার করা হলো
     api_id=API_ID,
     api_hash=API_HASH
 )

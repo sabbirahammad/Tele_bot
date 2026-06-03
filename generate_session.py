@@ -1,12 +1,24 @@
 import asyncio
+
+# Python 3.12+ compatibility fix for Pyrogram
+try:
+    asyncio.get_event_loop()
+except RuntimeError:
+    asyncio.set_event_loop(asyncio.new_event_loop())
+
 from pyrogram import Client
 
-# You can replace these with input prompts if you prefer
-API_ID = input("Enter your API_ID: ")
-API_HASH = input("Enter your API_HASH: ")
-
 async def main():
-    async with Client("my_account", api_id=API_ID, api_hash=API_HASH, in_memory=True) as app:
+    print("\n--- Telegram Session Generator ---")
+    try:
+        api_id = int(input("Enter your API_ID: ").strip())
+        api_hash = input("Enter your API_HASH: ").strip()
+    except ValueError:
+        print("❌ Error: API_ID must be a numeric value.")
+        return
+
+    print("\nLogging in... Please follow the Telegram prompts.")
+    async with Client("my_account", api_id=api_id, api_hash=api_hash, in_memory=True) as app:
         session_string = await app.export_session_string()
         print("\n--- YOUR STRING SESSION ---")
         print(session_string)

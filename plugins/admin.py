@@ -49,6 +49,11 @@ async def sync_channels_handler(bot, message):
     """
     আপনার আইডিতে থাকা সব চ্যানেল অটোমেটিক ডাটাবেজে সিঙ্ক করার কমান্ড।
     """
+    if not user.is_connected:
+        return await message.reply_text(
+            "❌ **User Client (STRING_SESSION) চালু নেই!**\nদয়া করে রেলওয়ে ভেরিয়েবল চেক করুন এবং বট রিস্টার্ট দিন।"
+        )
+        
     msg = await message.reply_text("🔄 আপনার জয়েন করা চ্যানেলগুলো সিঙ্ক করা হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন।")
     count = 0
     try:
