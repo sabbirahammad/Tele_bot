@@ -218,7 +218,7 @@ async def search(bot, message):
                 query = parts[1]
             else:
                 return await message.reply_text(get_string("search_usage", message.from_user.language_code))
-        elif message.text in ["/catagory", "/movie", "/livelink", "/worldcup", "/apk", "/buybot"]:
+        elif message.text in ["/catagory", "/movie", "/livelink", "/worldcup", "/apk", "/buybot", "/series", "/porn"]:
             query = message.text
         else:
             # এটি অন্য কমান্ড (যেমন /start), তাই অন্য হ্যান্ডলারকে কাজ করতে দাও
@@ -244,9 +244,9 @@ async def search(bot, message):
         if query in [get_string("cat_btn", lang), "/catagory"]:
             action = "show_cats"
         else:
-            if query == get_string("porn_btn", lang): # New
+            if query in [get_string("porn_btn", lang), "/porn"]:
                 action = "show_porn_cats" # New
-            elif query == get_string("series_btn", lang): # New
+            elif query in [get_string("series_btn", lang), "/series"]:
                 action = "show_web_series" # New
             try:
                 # কুয়েরিটিকে Base64 এ এনকোড করা হচ্ছে যাতে স্পেশাল ক্যারেক্টার হ্যান্ডেল করা যায়
@@ -271,6 +271,8 @@ async def search(bot, message):
         return await show_web_series_channels_handler(bot, message)
     elif query in [get_string("porn_btn", lang), "/porn"]:
         return await show_porn_categories_from_message(bot, message)
+    elif query in [get_string("wc_btn", lang), "/worldcup"]:
+        return await show_world_cup_info_handler(bot, message)
 
     wait_msg = await message.reply_text(get_string("searching", lang))
     results = search_files(query)

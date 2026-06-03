@@ -52,9 +52,8 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
             from plugins.search import search
             try:
                 # Base64 ডিকোড করে অরিজিনাল কুয়েরি বের করা
-                encoded_query = param[2:]
-                padding = '=' * (4 - len(encoded_query) % 4)
-                query = base64.urlsafe_b64decode(encoded_query + padding).decode('utf-8')
+                encoded_query = param[2:] # "q_" বাদ দিয়ে বাকিটুকু
+                query = base64.urlsafe_b64decode(encoded_query + '=' * (-len(encoded_query) % 4)).decode('utf-8')
                 
                 # মেসেজ অবজেক্টের টেক্সট পরিবর্তন করে সার্চ ফাংশন কল করা
                 message.text = query
@@ -85,11 +84,10 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
                     except Exception as bot_err:
                         logging.warning(f"Bot could not copy message directly: {bot_err}. Trying user fallback...")
                         try:
-                            # 2. Fallback: User client copies the message to the Bot's DM
+                            # 2. Fallback: User client forwards to Bot, then Bot copies to User
                             from loader import user
                             bot_me = await bot.get_me()
                             user_me = await user.get_me()
-
                             if not user.is_connected:
                                 await user.start()
 
@@ -105,7 +103,7 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
 
                             try:
                                 fwd_msg = await user.forward_messages(
-                                    chat_id=bot_me.username,
+                                    chat_id=bot_me.id,
                                     from_chat_id=ch_id,
                                     message_ids=msg_id
                                 )
@@ -174,8 +172,10 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
     # Reply Keyboard for main menu
     main_menu = ReplyKeyboardMarkup(
         [
-            [get_string("cat_btn", lang), get_string("movie_btn", lang), get_string("live_btn", lang), get_string("porn_btn", lang)],
-            [get_string("wc_btn", lang), get_string("apk_btn", lang), get_string("buy_btn", lang), get_string("series_btn", lang)]
+            [get_string("cat_btn", lang), get_string("movie_btn", lang)],
+            [get_string("live_btn", lang), get_string("porn_btn", lang)],
+            [get_string("wc_btn", lang), get_string("apk_btn", lang)],
+            [get_string("buy_btn", lang), get_string("series_btn", lang)]
         ],
         resize_keyboard=True, # বাটনগুলো সাইজ মতো ছোট দেখাবে
         persistent=True,   # বাটনগুলো সবসময় ইনপুট ফিল্ডের নিচে থাকবে
@@ -186,17 +186,23 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
         [
             InlineKeyboardButton(get_string("cat_btn", lang), callback_data="show_categories"),
             InlineKeyboardButton(get_string("movie_btn", lang), callback_data="show_movie_channels"),
+        ],
+        [
             InlineKeyboardButton(get_string("live_btn", lang), callback_data="show_live_link_channels"),
             InlineKeyboardButton(get_string("porn_btn", lang), callback_data="show_channels_in_category_Porn"),
         ],
         [
             InlineKeyboardButton(get_string("wc_btn", lang), callback_data="show_world_cup_info"),
             InlineKeyboardButton(get_string("apk_btn", lang), url="https://elitepassit.com"),
+        ],
+        [
             InlineKeyboardButton(get_string("buy_btn", lang), callback_data="show_buy_bot_contact"),
             InlineKeyboardButton(get_string("series_btn", lang), callback_data="show_web_series_channels"),
         ],
-        [InlineKeyboardButton(get_string("channel_btn", lang), url=os.getenv("CHANNEL_LINK", "https://t.me/YourChannelUsername"))],
-        [InlineKeyboardButton(get_string("help_btn", lang), callback_data="help_data")]
+        [
+            InlineKeyboardButton(get_string("channel_btn", lang), url=os.getenv("CHANNEL_LINK", "https://t.me/YourChannelUsername")),
+            InlineKeyboardButton(get_string("help_btn", lang), callback_data="help_data")
+        ]
     ]
 
     await message.reply_text(text, reply_markup=main_menu)
