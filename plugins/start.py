@@ -105,7 +105,7 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
 
                                 try:
                                     fwd_msg = await user.forward_messages(
-                                        chat_id=bot_me.username,
+                                        chat_id=bot_me.id,
                                         from_chat_id=ch_id,
                                         message_ids=msg_id
                                     )

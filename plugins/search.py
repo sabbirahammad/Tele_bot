@@ -488,7 +488,7 @@ async def fetch_file_handler(bot, cb):
 
             try:
                 fwd_msg = await user.forward_messages(
-                    chat_id=bot_me.username,
+                    chat_id=bot_me.id,
                     from_chat_id=ch_id,
                     message_ids=msg_id
                 )
@@ -500,12 +500,11 @@ async def fetch_file_handler(bot, cb):
             if fwd_msg:
                 fwd_msg_id = fwd_msg.id if not isinstance(fwd_msg, list) else fwd_msg[0].id
             
-            if fwd_msg_id:
-                sent_msg = await bot.copy_message(
-                    chat_id=cb.from_user.id,
-                    from_chat_id=user_me.id,
-                    message_id=fwd_msg_id
-                )
+            sent_msg = await bot.copy_message(
+                chat_id=cb.from_user.id,
+                from_chat_id=user_me.id,
+                message_id=fwd_msg_id
+            )
             
             await bot.delete_messages(chat_id=user_me.id, message_ids=fwd_msg_id)
             
