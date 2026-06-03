@@ -142,6 +142,13 @@ def add_user(user_id, username):
         cursor.execute("INSERT OR IGNORE INTO users (user_id, username, registration_date) VALUES (?, ?, ?)", (user_id, username, today))
         conn.commit()
 
+def user_exists(user_id):
+    """Checks if a user already exists in the database."""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1 FROM users WHERE user_id = ?", (user_id,))
+        return cursor.fetchone() is not None
+
 def is_user_verified(user_id):
     is_verified_today, _ = get_user_status(user_id)
     return is_verified_today

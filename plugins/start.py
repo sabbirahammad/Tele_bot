@@ -5,7 +5,7 @@ import sqlite3
 from pyrogram import Client, filters
 import os # os মডিউল ইম্পোর্ট করা হয়েছে
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
-from database import add_user, get_all_channels, verify_user, get_user_status, DB_PATH, get_channel_invite_link # Added get_user_status, DB_PATH
+from database import add_user, get_all_channels, verify_user, get_user_status, DB_PATH, get_channel_invite_link, user_exists
 from translation import get_string
 
 logging.info("start.py loaded successfully!")
@@ -20,6 +20,7 @@ async def auto_delete_message(message, delay=600):
 
 @Client.on_message(filters.command("start") & filters.private)
 async def start_handler(bot, message):    # অ্যাড দেখে ফিরে আসা ইউজারদের হ্যান্ডেল করা
+    try:
     if len(message.command) > 1:
         param = message.command[1]
         
@@ -145,29 +146,25 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
                 logging.error(f"Error handling file link: {e}")
             return
             
-    user_id = message.from_user.id
-    
-    # Check if user exists to determine if it's a new user's first /start
-    is_existing_user = False
-    with sqlite3.connect(DB_PATH) as conn: # Directly using sqlite3.connect here
-        cursor = conn.cursor()
-        cursor.execute("SELECT user_id FROM users WHERE user_id = ?", (user_id,))
-        if cursor.fetchone():
-            is_existing_user = True
+    if not message.from_user:
+        return
 
+    user_id = message.from_user.id
+    is_existing_user = user_exists(user_id)
     username = message.from_user.username or "No Username"    
     add_user(user_id, username) # Ensure user is in DB, sets registration_date if new
 
     # Now get the user status after ensuring they are in the database
     is_verified_today, is_first_day = get_user_status(user_id)
     lang = message.from_user.language_code
+    first_name = message.from_user.first_name or "User"
 
     # If a new user just typed /start and it's their first day, give them a special welcome.
     if not is_existing_user and is_first_day:
         verify_user(user_id) # Mark as verified for the free day
-        text = get_string("welcome", lang, name=message.from_user.first_name) + "\n\n" + get_string("first_day_free", lang)
+        text = get_string("welcome", lang, name=first_name) + "\n\n" + get_string("first_day_free", lang)
     else:
-        text = get_string("welcome", lang, name=message.from_user.first_name)
+        text = get_string("welcome", lang, name=first_name)
     
     # Reply Keyboard for main menu
     main_menu = ReplyKeyboardMarkup(
@@ -208,3 +205,7 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
     await message.reply_text(text, reply_markup=main_menu)
     prompt_text = "আপনার পছন্দের অপশনটি বেছে নিন:" if lang and lang.startswith("bn") else "Choose your preferred option:"
     await message.reply_text(prompt_text, reply_markup=InlineKeyboardMarkup(inline_buttons))
+
+    except Exception as e:
+        logging.error(f"Error in start_handler: {e}")
+        await message.reply_text("❌ একটি অভ্যন্তরীণ সমস্যা হয়েছে। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন।")
