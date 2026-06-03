@@ -95,32 +95,23 @@ async def get_shortlink(url):
     # api.gplinks.com এন্ডপয়েন্টটি সবচেয়ে বেশি স্টেবল
     api_url = "https://api.gplinks.com/api"
     
+    # ইউআরএলটি আগেই এনকোড করে নেওয়া ভালো যাতে স্পেশাল ক্যারেক্টার নিয়ে সমস্যা না হয়
+    encoded_url = urllib.parse.quote(url)
+    
     payload = {
         "api": GPLINKS_API,
-        "url": url
+        "url": encoded_url,
+        "format": "text"
     }
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json"
-    }
+    headers = {"User-Agent": "Mozilla/5.0"}
     try:
         async with aiohttp.ClientSession(headers=headers) as session:
             async with session.get(api_url, params=payload) as response:
-                if response.status == 200:
-                    try:
-                        data = await response.json(content_type=None)
-                        if data.get("status") == "success" and "shortenedUrl" in data:
-                            return data["shortenedUrl"].strip()
-                        else:
-                            print(f"Error: GPLinks API failed. Response: {data}")
-                    except Exception as json_err:
-                        # Fallback if response is not JSON
-                        text_data = await response.text()
-                        if text_data.startswith("http"):
-                            return text_data.strip()
-                        print(f"Error: GPLinks API returned non-JSON. Body: {text_data}")
+                short_url = await response.text()
+                if response.status == 200 and short_url.startswith("http"):
+                    return short_url.strip()
                 else:
-                    print(f"Error: GPLinks API returned status {response.status}, Body: {await response.text()}")
+                    print(f"Error: GPLinks API returned status {response.status}")
     except Exception as e:
         print(f"Error shortening link: {e}")
     # Return None instead of the original URL to prevent bypass
@@ -192,10 +183,10 @@ async def search(bot, message):
         return await send_daily_verification_message(bot, message, action)
 
     # Reply Keyboard বাটনগুলোর ক্লিক হ্যান্ডেল করা
-    if query in ["📂 ক্যাটাগরি", "/catagory"]:
-        return await show_categories_handler(bot, message, lang=lang)
+    if query in [get_string("cat_btn", lang), "/catagory"]:
+        return await show_categories_handler(bot, message)
     elif query in [get_string("movie_btn", lang), "/movie"]:
-        return await show_movie_channels_handler(bot, message, lang=lang)
+        return await show_movie_channels_handler(bot, message)
     elif query in [get_string("live_btn", lang), "/livelink"]:
         return await show_live_link_channels_handler(bot, message)
     
@@ -341,7 +332,7 @@ async def send_search_results(bot, chat_id, page):
             pass
 
     if sent_count == 0 and page == 0:
-        return await bot.send_message(chat_id, "❌ ভিডিওগুলো পাঠানো সম্ভব হয়নি। বটের হয়তো ওই চ্যানেলে অ্যাক্সেস নেই।", reply_markup=MAIN_MENU)
+        return await bot.send_message(chat_id, "❌ ভিডিওগুলো পাঠানো সম্ভব হয়নি। বটের হয়তো ওই চ্যানেলে অ্যাক্সেস নেই।")
 
     total_results = len(results)
     total_pages = (total_results + page_size - 1) // page_size
