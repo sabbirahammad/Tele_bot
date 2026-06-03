@@ -36,13 +36,14 @@ async def start_services():
     ])
     
     logging.info("--- Bot Client Started ---")
-    if os.getenv("STRING_SESSION"): # Only attempt to start user client if STRING_SESSION is provided
+    string_session = os.getenv("STRING_SESSION")
+    if string_session: 
         await user.start()
         logging.info("--- User Client (Your ID) Started ---")
     else:
-        logging.warning("STRING_SESSION environment variable not found. User client cannot be started. Auto-indexing and global search features will be disabled.")
-        # If the user client is critical for your bot's core functionality,
-        # you might consider exiting the application here if STRING_SESSION is mandatory.
+        logging.warning("⚠️ STRING_SESSION missing! The bot will only work with existing database records.")
+        logging.warning("Global search and auto-indexing are DISABLED.")
+
     await asyncio.Event().wait()
 
 async def stop_services():

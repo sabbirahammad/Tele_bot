@@ -13,7 +13,7 @@ GPLINKS_API = os.getenv("GPLINKS_API", "c6c60266f958ad52b6999f348e63d1f2bc6fc629
 
 # Bot Client: ইউজারদের সাথে কথা বলার জন্য
 bot = Client(
-    "bot_session",
+    "bot_session", 
     api_id=API_ID,
     api_hash=API_HASH,
     bot_token=BOT_TOKEN,
@@ -22,7 +22,7 @@ bot = Client(
 
 # User Client: আপনার জয়েন করা চ্যানেলের ফাইল ইনডেক্স করার জন্য
 user = Client(
-    os.getenv("SESSION_STRING", "user_session"), # সেশন স্ট্রিং থাকলে সেটি ব্যবহার করবে
+    os.getenv("STRING_SESSION", "user_session"), # সেশন স্ট্রিং থাকলে সেটি ব্যবহার করবে
     api_id=API_ID,
     api_hash=API_HASH
 )
