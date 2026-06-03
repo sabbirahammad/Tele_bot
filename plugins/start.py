@@ -2,6 +2,7 @@ import logging
 import asyncio
 import base64
 import sqlite3
+import urllib.parse
 from pyrogram import Client, filters
 import os # os মডিউল ইম্পোর্ট করা হয়েছে
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
@@ -66,6 +67,14 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
             elif param.startswith("file_"):
                 # ফরম্যাট: file_channelid_messageid (channelid could be negative)
                 sent_msg = None
+                bot_me = await bot.get_me()
+                
+                # লিংকের এনকোডিং এরর থেকে বাঁচতে ডাটা ক্লিনআপ
+                data = param[5:]
+                parts = data.rsplit("_", 1)
+                if len(parts) != 2:
+                    return await message.reply_text("❌ লিংকে সমস্যা আছে।")
+                
                 try:
                     # Remove the "file_" prefix first to handle negative signs
                     data = param[5:]
@@ -75,6 +84,15 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
                         ch_id = int(parts[0])
                         msg_id = int(parts[1])
                         
+                        # যদি বট চ্যানেলটি না চিনে (Peer id invalid), তবে লিংক দিয়ে রেজলভ করার চেষ্টা
+                        link = get_channel_invite_link(ch_id)
+                        if link and "t.me/+" not in link: # পাবলিক চ্যানেল হলে
+                            try:
+                                username = link.split("/")[-1]
+                                await bot.get_chat(username)
+                            except Exception:
+                                pass
+
                         try:
                             # 1. First try to copy directly with the bot
                             sent_msg = await bot.copy_message(
@@ -90,15 +108,14 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
                                 if not user.is_connected:
                                     await user.start()
 
-                                bot_me = await bot.get_me()
                                 user_me = await user.get_me()
 
                                 # Try to resolve peer or re-join
                                 try:
                                     await user.get_chat(ch_id)
                                 except Exception as e:
-                                    logging.warning(f"Peer {ch_id} invalid, trying re-join: {e}")
-                                    link = get_channel_invite_link(ch_id)
+                                    logging.warning(f"Peer {ch_id} invalid for user client, trying resolve via link: {e}")
+                                    # ইনভাইট লিংক দিয়ে চ্যানেল মেমোরিতে লোড করা
                                     if link:
                                         try: await user.join_chat(link)
                                         except Exception: pass
@@ -150,6 +167,7 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
         if not message.from_user:
             return
 
+        bot_info = await bot.get_me()
         user_id = message.from_user.id
         is_existing_user = user_exists(user_id)
         username = message.from_user.username or "No Username"    
@@ -179,6 +197,12 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
             is_persistent=True,   # বাটনগুলো সবসময় ইনপুট ফিল্ডের নিচে থাকবে
             placeholder=get_string("search_placeholder", lang) # টাইপিং বক্সে স্থায়ী নির্দেশিকা
         )
+        
+        # শেয়ার ইউআরএল এনকোডিং (Fixes 400 BUTTON_URL_INVALID)
+        share_text = "এই বটের মাধ্যমে আপনি সব ধরণের মুভি এবং ওয়েব সিরিজ একদম ফ্রিতে ডাউনলোড করতে পারবেন! 🔥"
+        encoded_text = urllib.parse.quote(share_text)
+        share_url = f"https://t.me/{bot_info.username}"
+        
         # Inline keyboard for the initial message (consistent with return_to_start_menu)
         inline_buttons = [
             [
@@ -202,7 +226,7 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
                 InlineKeyboardButton(get_string("help_btn", lang), callback_data="help_data")
             ],
             [
-                InlineKeyboardButton("🚀 বন্ধুদের সাথে শেয়ার করুন", url=f"https://t.me/share/url?url=https://t.me/{(await bot.get_me()).username}&text=এই বটের মাধ্যমে আপনি সব ধরণের মুভি এবং ওয়েব সিরিজ একদম ফ্রিতে ডাউনলোড করতে পারবেন! 🔥")
+                InlineKeyboardButton("🚀 বন্ধুদের সাথে শেয়ার করুন", url=f"https://t.me/share/url?url={share_url}&text={encoded_text}")
             ]
         ]
 
