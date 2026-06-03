@@ -81,7 +81,7 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
                             chat_id=message.chat.id,
                             from_chat_id=ch_id,
                             message_id=msg_id
-                        )
+                        ) # sent_msg সফল হলে সেট হবে
                     except Exception as bot_err:
                         logging.warning(f"Bot could not copy message directly: {bot_err}. Trying user fallback...")
                         try:
@@ -90,20 +90,25 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
                             bot_me = await bot.get_me()
                             user_me = await user.get_me()
 
-                            # Peer id invalid এরর এড়াতে চ্যাটটি রেজলভ করে নেওয়া হচ্ছে
+                            # Peer id invalid এরর এড়াতে চ্যাটটি রেজলভ করে নেওয়া হচ্ছে।
+                            # যদি ইউজার ক্লায়েন্ট চ্যানেলে অ্যাক্সেস করতে না পারে, তবে ফরোয়ার্ড করা সম্ভব নয়।
                             try:
                                 await user.get_chat(ch_id)
-                            except Exception:
-                                pass
-
-                            # User forwards the message and we get the message object directly from the response
-                            fwd_msg = await user.forward_messages(
-                                chat_id=bot_me.username,
-                                from_chat_id=ch_id,
-                                message_ids=msg_id
-                            )
+                                # User forwards the message and we get the message object directly from the response
+                                fwd_msg = await user.forward_messages(
+                                    chat_id=bot_me.username,
+                                    from_chat_id=ch_id,
+                                    message_ids=msg_id
+                                )
+                            except Exception as e:
+                                logging.warning(f"User client failed to access or forward from channel {ch_id}: {e}")
+                                # যদি ইউজার ক্লায়েন্ট অ্যাক্সেস বা ফরোয়ার্ড করতে না পারে, তবে fwd_msg None থাকবে।
+                                # এর ফলে sent_msg None থাকবে এবং "ফাইলটি পাওয়া যায়নি" মেসেজটি দেখানো হবে।
+                                fwd_msg = None
                             
-                            fwd_msg_id = fwd_msg.id if not isinstance(fwd_msg, list) else fwd_msg[0].id
+                            fwd_msg_id = None
+                            if fwd_msg: # fwd_msg None না হলে অ্যাট্রিবিউট অ্যাক্সেস করা হবে
+                                fwd_msg_id = fwd_msg.id if not isinstance(fwd_msg, list) else fwd_msg[0].id
 
                             if fwd_msg_id:
                                 # Bot copies from its own DM to Target User

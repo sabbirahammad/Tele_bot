@@ -388,7 +388,7 @@ async def fetch_file_handler(bot, cb):
                 chat_id=cb.from_user.id,
                 from_chat_id=ch_id,
                 message_id=msg_id
-            )
+            ) # sent_msg সফল হলে সেট হবে
         except Exception:
             # 2. Fallback: Use User client to copy to bot's DM, then bot copies to user
             from loader import user
