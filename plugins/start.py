@@ -21,190 +21,190 @@ async def auto_delete_message(message, delay=600):
 @Client.on_message(filters.command("start") & filters.private)
 async def start_handler(bot, message):    # অ্যাড দেখে ফিরে আসা ইউজারদের হ্যান্ডেল করা
     try:
-    if len(message.command) > 1:
-        param = message.command[1]
-        
-        if param == "verify_daily":
-            verify_user(message.from_user.id)
-            # The actual message will be determined below based on is_first_day
-            # Continue to show main menu below
+        if len(message.command) > 1:
+            param = message.command[1]
             
-        elif param == "show_cats":
-            # সার্কেল ইমপোর্ট এড়াতে ফাংশনের ভেতরে ইমপোর্ট করা হয়েছে
-            verify_user(message.from_user.id)
-            from plugins.search import show_categories_handler
-            await message.reply_text("✅ ভেরিফিকেশন সফল হয়েছে!\n\n📂 **ক্যাটাগরি সমূহ নিচে দেওয়া হলো:**")
-            return await show_categories_handler(bot, message)
-            
-        elif param == "show_porn_cats":
-            verify_user(message.from_user.id)
-            from plugins.search import show_porn_categories_from_message
-            await message.reply_text("✅ ভেরিফিকেশন সফল হয়েছে!\n\n🔞 **Porn সাব-ক্যাটাগরি সমূহ নিচে দেওয়া হলো:**")
-            return await show_porn_categories_from_message(bot, message)
-            
-        elif param == "show_web_series":
-            verify_user(message.from_user.id)
-            from plugins.search import show_web_series_channels_handler
-            await message.reply_text("✅ ভেরিফিকেশন সফল হয়েছে!\n\n📺 **ওয়েব সিরিজ চ্যানেলসমূহ নিচে দেওয়া হলো:**")
-            return await show_web_series_channels_handler(bot, message)
-            
-        elif param.startswith("q_"):
-            verify_user(message.from_user.id)
-            from plugins.search import search
-            try:
-                # Base64 ডিকোড করে অরিজিনাল কুয়েরি বের করা
-                encoded_query = param[2:] # "q_" বাদ দিয়ে বাকিটুকু
-                query = base64.urlsafe_b64decode(encoded_query + '=' * (-len(encoded_query) % 4)).decode('utf-8')
+            if param == "verify_daily":
+                verify_user(message.from_user.id)
+                # The actual message will be determined below based on is_first_day
+                # Continue to show main menu below
                 
-                # মেসেজ অবজেক্টের টেক্সট পরিবর্তন করে সার্চ ফাংশন কল করা
-                message.text = query
-                await message.reply_text(f"✅ ভেরিফিকেশন সফল হয়েছে!\n🔍 **'{query}'** এর রেজাল্ট খোঁজা হচ্ছে...")
-                return await search(bot, message)
-            except Exception:
-                await message.reply_text("✅ ভেরিফিকেশন সফল হয়েছে!")
-
-        elif param.startswith("file_"):
-            # ফরম্যাট: file_channelid_messageid (channelid could be negative)
-            sent_msg = None
-            try:
-                # Remove the "file_" prefix first to handle negative signs
-                data = param[5:]
-                # rsplit to handle negative numbers better, assuming message_id is positive
-                parts = data.rsplit("_", 1)
-                if len(parts) == 2:
-                    ch_id = int(parts[0])
-                    msg_id = int(parts[1])
+            elif param == "show_cats":
+                # সার্কেল ইমপোর্ট এড়াতে ফাংশনের ভেতরে ইমপোর্ট করা হয়েছে
+                verify_user(message.from_user.id)
+                from plugins.search import show_categories_handler
+                await message.reply_text("✅ ভেরিফিকেশন সফল হয়েছে!\n\n📂 **ক্যাটাগরি সমূহ নিচে দেওয়া হলো:**")
+                return await show_categories_handler(bot, message)
+                
+            elif param == "show_porn_cats":
+                verify_user(message.from_user.id)
+                from plugins.search import show_porn_categories_from_message
+                await message.reply_text("✅ ভেরিফিকেশন সফল হয়েছে!\n\n🔞 **Porn সাব-ক্যাটাগরি সমূহ নিচে দেওয়া হলো:**")
+                return await show_porn_categories_from_message(bot, message)
+                
+            elif param == "show_web_series":
+                verify_user(message.from_user.id)
+                from plugins.search import show_web_series_channels_handler
+                await message.reply_text("✅ ভেরিফিকেশন সফল হয়েছে!\n\n📺 **ওয়েব সিরিজ চ্যানেলসমূহ নিচে দেওয়া হলো:**")
+                return await show_web_series_channels_handler(bot, message)
+                
+            elif param.startswith("q_"):
+                verify_user(message.from_user.id)
+                from plugins.search import search
+                try:
+                    # Base64 ডিকোড করে অরিজিনাল কুয়েরি বের করা
+                    encoded_query = param[2:] # "q_" বাদ দিয়ে বাকিটুকু
+                    query = base64.urlsafe_b64decode(encoded_query + '=' * (-len(encoded_query) % 4)).decode('utf-8')
                     
-                    try:
-                        # 1. First try to copy directly with the bot
-                        sent_msg = await bot.copy_message(
-                            chat_id=message.chat.id,
-                            from_chat_id=ch_id,
-                            message_id=msg_id
-                        ) # sent_msg সফল হলে সেট হবে
-                    except Exception as bot_err:
-                        logging.warning(f"Bot could not copy message directly: {bot_err}. Trying user fallback...")
+                    # মেসেজ অবজেক্টের টেক্সট পরিবর্তন করে সার্চ ফাংশন কল করা
+                    message.text = query
+                    await message.reply_text(f"✅ ভেরিফিকেশন সফল হয়েছে!\n🔍 **'{query}'** এর রেজাল্ট খোঁজা হচ্ছে...")
+                    return await search(bot, message)
+                except Exception:
+                    await message.reply_text("✅ ভেরিফিকেশন সফল হয়েছে!")
+
+            elif param.startswith("file_"):
+                # ফরম্যাট: file_channelid_messageid (channelid could be negative)
+                sent_msg = None
+                try:
+                    # Remove the "file_" prefix first to handle negative signs
+                    data = param[5:]
+                    # rsplit to handle negative numbers better, assuming message_id is positive
+                    parts = data.rsplit("_", 1)
+                    if len(parts) == 2:
+                        ch_id = int(parts[0])
+                        msg_id = int(parts[1])
+                        
                         try:
-                            # 2. Fallback: User client forwards to Bot, then Bot copies to User
-                            from loader import user
-                            bot_me = await bot.get_me()
-                            user_me = await user.get_me()
-                            if not user.is_connected:
-                                await user.start()
-
-                            # Try to resolve peer or re-join
+                            # 1. First try to copy directly with the bot
+                            sent_msg = await bot.copy_message(
+                                chat_id=message.chat.id,
+                                from_chat_id=ch_id,
+                                message_id=msg_id
+                            ) # sent_msg সফল হলে সেট হবে
+                        except Exception as bot_err:
+                            logging.warning(f"Bot could not copy message directly: {bot_err}. Trying user fallback...")
                             try:
-                                await user.get_chat(ch_id)
-                            except Exception as e:
-                                logging.warning(f"Peer {ch_id} invalid, trying re-join: {e}")
-                                link = get_channel_invite_link(ch_id)
-                                if link:
-                                    try: await user.join_chat(link)
-                                    except Exception: pass
+                                # 2. Fallback: User client forwards to Bot, then Bot copies to User
+                                from loader import user
+                                bot_me = await bot.get_me()
+                                user_me = await user.get_me()
+                                if not user.is_connected:
+                                    await user.start()
 
+                                # Try to resolve peer or re-join
+                                try:
+                                    await user.get_chat(ch_id)
+                                except Exception as e:
+                                    logging.warning(f"Peer {ch_id} invalid, trying re-join: {e}")
+                                    link = get_channel_invite_link(ch_id)
+                                    if link:
+                                        try: await user.join_chat(link)
+                                        except Exception: pass
+
+                                try:
+                                    fwd_msg = await user.forward_messages(
+                                        chat_id=bot_me.id,
+                                        from_chat_id=ch_id,
+                                        message_ids=msg_id
+                                    )
+                                except Exception as e:
+                                    logging.error(f"Forward failed: {e}")
+                                    fwd_msg = None
+                                
+                                fwd_msg_id = None
+                                if fwd_msg: # fwd_msg None না হলে অ্যাট্রিবিউট অ্যাক্সেস করা হবে
+                                    fwd_msg_id = fwd_msg.id if not isinstance(fwd_msg, list) else fwd_msg[0].id
+
+                                if fwd_msg_id:
+                                    # Bot copies from its own DM to Target User
+                                    sent_msg = await bot.copy_message(
+                                        chat_id=message.chat.id,
+                                        from_chat_id=user_me.id,
+                                        message_id=fwd_msg_id
+                                    )
+
+                                    # Cleanup the bot's DM
+                                    await bot.delete_messages(chat_id=user_me.id, message_ids=fwd_msg_id)
+                            except Exception as user_err:
+                                logging.error(f"User fallback also failed: {user_err}")                            
+                        if sent_msg:
                             try:
-                                fwd_msg = await user.forward_messages(
-                                    chat_id=bot_me.id,
-                                    from_chat_id=ch_id,
-                                    message_ids=msg_id
-                                )
-                            except Exception as e:
-                                logging.error(f"Forward failed: {e}")
-                                fwd_msg = None
-                            
-                            fwd_msg_id = None
-                            if fwd_msg: # fwd_msg None না হলে অ্যাট্রিবিউট অ্যাক্সেস করা হবে
-                                fwd_msg_id = fwd_msg.id if not isinstance(fwd_msg, list) else fwd_msg[0].id
-
-                            if fwd_msg_id:
-                                # Bot copies from its own DM to Target User
-                                sent_msg = await bot.copy_message(
-                                    chat_id=message.chat.id,
-                                    from_chat_id=user_me.id,
-                                    message_id=fwd_msg_id
-                                )
-
-                                # Cleanup the bot's DM
-                                await bot.delete_messages(chat_id=user_me.id, message_ids=fwd_msg_id)
-                        except Exception as user_err:
-                            logging.error(f"User fallback also failed: {user_err}")                            
-                    if sent_msg:
-                        try:
-                            # ইউজারকে সতর্কতা মেসেজ পাঠানো
-                            warning_msg = await message.reply_text("⏳ **সতর্কতা:** কপিরাইট এড়াতে এই ফাইলটি ১০ মিনিট পর অটোমেটিক ডিলিট করে দেওয়া হবে। দয়া করে এর মধ্যেই ফাইলটি সেভ বা অন্য কোথাও ফরোয়ার্ড করে রাখুন।")
-                            
-                            # অটো-ডিলিট টাস্ক শুরু করা
-                            asyncio.create_task(auto_delete_message(sent_msg, 600))
-                            asyncio.create_task(auto_delete_message(warning_msg, 600))
-                        except Exception:
-                            logging.warning("Failed to send warning message or set auto-delete.")
-                        return 
-                    else:
-                        await message.reply_text("❌ ফাইলটি পাওয়া যায়নি। চ্যানেলটি হয়তো প্রাইভেট বা ডিলিট হয়ে গেছে।")
-                        return
-            except Exception as e:
-                logging.error(f"Error handling file link: {e}")
+                                # ইউজারকে সতর্কতা মেসেজ পাঠানো
+                                warning_msg = await message.reply_text("⏳ **সতর্কতা:** কপিরাইট এড়াতে এই ফাইলটি ১০ মিনিট পর অটোমেটিক ডিলিট করে দেওয়া হবে। দয়া করে এর মধ্যেই ফাইলটি সেভ বা অন্য কোথাও ফরোয়ার্ড করে রাখুন।")
+                                
+                                # অটো-ডিলিট টাস্ক শুরু করা
+                                asyncio.create_task(auto_delete_message(sent_msg, 600))
+                                asyncio.create_task(auto_delete_message(warning_msg, 600))
+                            except Exception:
+                                logging.warning("Failed to send warning message or set auto-delete.")
+                            return 
+                        else:
+                            await message.reply_text("❌ ফাইলটি পাওয়া যায়নি। চ্যানেলটি হয়তো প্রাইভেট বা ডিলিট হয়ে গেছে।")
+                            return
+                except Exception as e:
+                    logging.error(f"Error handling file link: {e}")
+                return
+                
+        if not message.from_user:
             return
-            
-    if not message.from_user:
-        return
 
-    user_id = message.from_user.id
-    is_existing_user = user_exists(user_id)
-    username = message.from_user.username or "No Username"    
-    add_user(user_id, username) # Ensure user is in DB, sets registration_date if new
+        user_id = message.from_user.id
+        is_existing_user = user_exists(user_id)
+        username = message.from_user.username or "No Username"    
+        add_user(user_id, username) # Ensure user is in DB, sets registration_date if new
 
-    # Now get the user status after ensuring they are in the database
-    is_verified_today, is_first_day = get_user_status(user_id)
-    lang = message.from_user.language_code
-    first_name = message.from_user.first_name or "User"
+        # Now get the user status after ensuring they are in the database
+        is_verified_today, is_first_day = get_user_status(user_id)
+        lang = message.from_user.language_code
+        first_name = message.from_user.first_name or "User"
 
-    # If a new user just typed /start and it's their first day, give them a special welcome.
-    if not is_existing_user and is_first_day:
-        verify_user(user_id) # Mark as verified for the free day
-        text = get_string("welcome", lang, name=first_name) + "\n\n" + get_string("first_day_free", lang)
-    else:
-        text = get_string("welcome", lang, name=first_name)
-    
-    # Reply Keyboard for main menu
-    main_menu = ReplyKeyboardMarkup(
-        [
-            [get_string("cat_btn", lang), get_string("movie_btn", lang)],
-            [get_string("live_btn", lang), get_string("porn_btn", lang)],
-            [get_string("wc_btn", lang), get_string("apk_btn", lang)],
-            [get_string("buy_btn", lang), get_string("series_btn", lang)]
-        ],
-        resize_keyboard=True, # বাটনগুলো সাইজ মতো ছোট দেখাবে
-        persistent=True,   # বাটনগুলো সবসময় ইনপুট ফিল্ডের নিচে থাকবে
-        placeholder=get_string("search_placeholder", lang) # টাইপিং বক্সে স্থায়ী নির্দেশিকা
-    )
-    # Inline keyboard for the initial message (consistent with return_to_start_menu)
-    inline_buttons = [
-        [
-            InlineKeyboardButton(get_string("cat_btn", lang), callback_data="show_categories"),
-            InlineKeyboardButton(get_string("movie_btn", lang), callback_data="show_movie_channels"),
-        ],
-        [
-            InlineKeyboardButton(get_string("live_btn", lang), callback_data="show_live_link_channels"),
-            InlineKeyboardButton(get_string("porn_btn", lang), callback_data="show_channels_in_category_Porn"),
-        ],
-        [
-            InlineKeyboardButton(get_string("wc_btn", lang), callback_data="show_world_cup_info"),
-            InlineKeyboardButton(get_string("apk_btn", lang), url="https://elitepassit.com"),
-        ],
-        [
-            InlineKeyboardButton(get_string("buy_btn", lang), callback_data="show_buy_bot_contact"),
-            InlineKeyboardButton(get_string("series_btn", lang), callback_data="show_web_series_channels"),
-        ],
-        [
-            InlineKeyboardButton(get_string("channel_btn", lang), url=os.getenv("CHANNEL_LINK", "https://t.me/YourChannelUsername")),
-            InlineKeyboardButton(get_string("help_btn", lang), callback_data="help_data")
+        # If a new user just typed /start and it's their first day, give them a special welcome.
+        if not is_existing_user and is_first_day:
+            verify_user(user_id) # Mark as verified for the free day
+            text = get_string("welcome", lang, name=first_name) + "\n\n" + get_string("first_day_free", lang)
+        else:
+            text = get_string("welcome", lang, name=first_name)
+        
+        # Reply Keyboard for main menu
+        main_menu = ReplyKeyboardMarkup(
+            [
+                [get_string("cat_btn", lang), get_string("movie_btn", lang)],
+                [get_string("live_btn", lang), get_string("porn_btn", lang)],
+                [get_string("wc_btn", lang), get_string("apk_btn", lang)],
+                [get_string("buy_btn", lang), get_string("series_btn", lang)]
+            ],
+            resize_keyboard=True, # বাটনগুলো সাইজ মতো ছোট দেখাবে
+            persistent=True,   # বাটনগুলো সবসময় ইনপুট ফিল্ডের নিচে থাকবে
+            placeholder=get_string("search_placeholder", lang) # টাইপিং বক্সে স্থায়ী নির্দেশিকা
+        )
+        # Inline keyboard for the initial message (consistent with return_to_start_menu)
+        inline_buttons = [
+            [
+                InlineKeyboardButton(get_string("cat_btn", lang), callback_data="show_categories"),
+                InlineKeyboardButton(get_string("movie_btn", lang), callback_data="show_movie_channels"),
+            ],
+            [
+                InlineKeyboardButton(get_string("live_btn", lang), callback_data="show_live_link_channels"),
+                InlineKeyboardButton(get_string("porn_btn", lang), callback_data="show_channels_in_category_Porn"),
+            ],
+            [
+                InlineKeyboardButton(get_string("wc_btn", lang), callback_data="show_world_cup_info"),
+                InlineKeyboardButton(get_string("apk_btn", lang), url="https://elitepassit.com"),
+            ],
+            [
+                InlineKeyboardButton(get_string("buy_btn", lang), callback_data="show_buy_bot_contact"),
+                InlineKeyboardButton(get_string("series_btn", lang), callback_data="show_web_series_channels"),
+            ],
+            [
+                InlineKeyboardButton(get_string("channel_btn", lang), url=os.getenv("CHANNEL_LINK", "https://t.me/YourChannelUsername")),
+                InlineKeyboardButton(get_string("help_btn", lang), callback_data="help_data")
+            ]
         ]
-    ]
 
-    await message.reply_text(text, reply_markup=main_menu)
-    prompt_text = "আপনার পছন্দের অপশনটি বেছে নিন:" if lang and lang.startswith("bn") else "Choose your preferred option:"
-    await message.reply_text(prompt_text, reply_markup=InlineKeyboardMarkup(inline_buttons))
+        await message.reply_text(text, reply_markup=main_menu)
+        prompt_text = "আপনার পছন্দের অপশনটি বেছে নিন:" if lang and lang.startswith("bn") else "Choose your preferred option:"
+        await message.reply_text(prompt_text, reply_markup=InlineKeyboardMarkup(inline_buttons))
 
     except Exception as e:
         logging.error(f"Error in start_handler: {e}")
