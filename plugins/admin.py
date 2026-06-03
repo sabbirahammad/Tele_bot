@@ -2,7 +2,8 @@ import os
 import asyncio
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait
-from loader import user # User ক্লায়েন্ট ইম্পোর্ট
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery # নতুন ইম্পোর্ট
+from loader import user, bot # User ক্লায়েন্ট ইম্পোর্ট, bot ক্লায়েন্টও লাগবে
 from database import count_channel_files, count_users, get_all_users, add_channel, del_channel, count_active_channels
 
 ADMINS = [int(id) for id in os.getenv("ADMIN_ID", "0").split()]
@@ -93,32 +94,85 @@ async def broadcast_handler(bot, message):
         return await message.reply_text("ব্যবহার: কোনো মেসেজ রিপ্লাই দিয়ে `/broadcast` লিখুন।")
     
     users = get_all_users()
-    status = await message.reply_text(f"📢 ব্রডকাস্টিং শুরু হয়েছে... {len(users)} জন ইউজারকে পাঠানো হচ্ছে।")
+    total_users = len(users)
+
+    # Confirmation step
+    confirm_text = f"📢 আপনি কি নিশ্চিত যে আপনি এই মেসেজটি **{total_users}** জন ইউজারকে ব্রডকাস্ট করতে চান?\n\n" \
+                   "এই অ্যাকশনটি বাতিল করা যাবে না।"
+    confirm_buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton("✅ নিশ্চিত করুন", callback_data="confirm_broadcast")],
+        [InlineKeyboardButton("❌ বাতিল করুন", callback_data="cancel_broadcast")]
+    ])
+    await message.reply_text(confirm_text, reply_markup=confirm_buttons)
+
+# New callback handler for broadcast confirmation
+@Client.on_callback_query(filters.regex("confirm_broadcast") & filters.user(ADMINS))
+async def confirm_broadcast_callback(bot, cb: CallbackQuery):
+    await cb.message.edit_reply_markup(reply_markup=None) # Remove buttons
+    await cb.message.edit_text("📢 ব্রডকাস্টিং শুরু হচ্ছে...")
+
+    # Get the original message to broadcast (the one the admin replied to)
+    original_message = cb.message.reply_to_message
+    if not original_message:
+        return await cb.message.edit_text("❌ ব্রডকাস্ট করার জন্য কোনো মেসেজ খুঁজে পাওয়া যায়নি।")
+
+    users = get_all_users()
+    total_users = len(users)
+    status_message = await cb.message.reply_text(f"📢 ব্রডকাস্টিং শুরু হয়েছে... {total_users} জন ইউজারকে পাঠানো হচ্ছে।")
     
     success = 0
     failed = 0
     
-    for user_id in users:
+    for i, user_id in enumerate(users):
         try:
-            await message.reply_to_message.copy(user_id)
+            await original_message.copy(user_id)
             success += 1
         except FloodWait as e:
+            logging.warning(f"FloodWait for user {user_id}: {e.value} seconds. Sleeping...")
             await asyncio.sleep(e.value)
-            await message.reply_to_message.copy(user_id)
-            success += 1
-        except Exception:
+            try:
+                await original_message.copy(user_id)
+                success += 1
+            except Exception as retry_e:
+                logging.error(f"Failed to send to user {user_id} after FloodWait: {retry_e}")
+                failed += 1
+        except Exception as e:
+            logging.error(f"Failed to send to user {user_id}: {e}")
             failed += 1
             
-        # প্রতি ২০টি মেসেজ পর পর প্রগ্রেস আপডেট (অপশনাল)
-        if (success + failed) % 20 == 0:
+        # Update progress more frequently, e.g., every 10 users or 5%
+        if (i + 1) % 10 == 0 or (i + 1) == total_users:
             try:
-                await status.edit_text(f"⏳ প্রগ্রেস: {success + failed}/{len(users)}")
-            except:
-                pass
+                progress_percent = ((success + failed) / total_users) * 100
+                await status_message.edit_text(
+                    f"⏳ ব্রডকাস্টিং প্রগ্রেস: {success + failed}/{total_users} ({progress_percent:.2f}%)\n"
+                    f"✅ সফল: {success}\n❌ ব্যর্থ: {failed}"
+                )
+            except Exception as edit_e:
+                logging.error(f"Failed to edit broadcast status message: {edit_e}")
+        
+        await asyncio.sleep(0.1) # Small delay to prevent FloodWait
 
-    await status.edit_text(
-        f"✅ ব্রডকাস্ট সম্পন্ন!\n\n🚀 সফল: {success}\n❌ ব্যর্থ: {failed}"
+    final_text = (
+        f"✅ ব্রডকাস্ট সম্পন্ন!\n\n"
+        f"🚀 সফল: {success}\n"
+        f"❌ ব্যর্থ: {failed}\n\n"
+        f"মোট ইউজার: {total_users}"
     )
+    await status_message.edit_text(final_text)
+
+    # Notify admin about completion
+    for admin_id in ADMINS:
+        if admin_id != cb.from_user.id: # Don't send to the admin who initiated if it's the same
+            try:
+                await bot.send_message(admin_id, f"📢 ব্রডকাস্ট সম্পন্ন হয়েছে!\n{final_text}")
+            except Exception as admin_notify_e:
+                logging.error(f"Failed to notify admin {admin_id} about broadcast completion: {admin_notify_e}")
+
+@Client.on_callback_query(filters.regex("cancel_broadcast") & filters.user(ADMINS))
+async def cancel_broadcast_callback(bot, cb: CallbackQuery):
+    await cb.message.edit_text("❌ ব্রডকাস্ট বাতিল করা হয়েছে।")
+    await cb.answer("ব্রডকাস্ট বাতিল করা হয়েছে।")
 
 @Client.on_message(filters.command("auto") & filters.user(ADMINS))
 async def auto_crawl_handler(bot, message):

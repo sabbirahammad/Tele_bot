@@ -199,6 +199,9 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
             [
                 InlineKeyboardButton(get_string("channel_btn", lang), url=os.getenv("CHANNEL_LINK", "https://t.me/YourChannelUsername")),
                 InlineKeyboardButton(get_string("help_btn", lang), callback_data="help_data")
+            ],
+            [
+                InlineKeyboardButton("🚀 বন্ধুদের সাথে শেয়ার করুন", url=f"https://t.me/share/url?url=https://t.me/{(await bot.get_me()).username}&text=এই বটের মাধ্যমে আপনি সব ধরণের মুভি এবং ওয়েব সিরিজ একদম ফ্রিতে ডাউনলোড করতে পারবেন! 🔥")
             ]
         ]
 
