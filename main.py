@@ -28,6 +28,7 @@ async def start_services():
         BotCommand("catagory", "📂 সব ক্যাটাগরি"),
         BotCommand("porn", "🔞 Porn ক্যাটাগরি"), # Added for consistency with search.py
         BotCommand("movie", "🎬 মুভি চ্যানেল"),
+        BotCommand("invite", "🤝 ইনভাইট ও ইনকাম"),
         BotCommand("livelink", "🔴 লাইভ লিংক"),
         BotCommand("series", "📺 Web Series"), # Added for consistency with search.py
         BotCommand("worldcup", "🏆 বিশ্বকাপ আপডেট"),

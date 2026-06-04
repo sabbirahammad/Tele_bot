@@ -220,7 +220,7 @@ async def search(bot, message):
                 query = parts[1]
             else:
                 return await message.reply_text(get_string("search_usage", message.from_user.language_code))
-        elif message.text in ["/catagory", "/movie", "/livelink", "/worldcup", "/apk", "/buybot", "/series", "/porn"]:
+        elif message.text in ["/catagory", "/movie", "/livelink", "/worldcup", "/apk", "/buybot", "/series", "/porn", "/invite"]:
             query = message.text
         else:
             # এটি অন্য কমান্ড (যেমন /start), তাই অন্য হ্যান্ডলারকে কাজ করতে দাও
@@ -267,6 +267,9 @@ async def search(bot, message):
         return await show_categories_handler(bot, message)
     elif query in [get_string("movie_btn", lang), "/movie"]:
         return await show_movie_channels_handler(bot, message)
+    elif query in [get_string("invite_earn_btn", lang), "/invite"]:
+        from plugins.withdraw import show_invite_earn_menu
+        return await show_invite_earn_menu(bot, message)
     elif query in [get_string("live_btn", lang), "/livelink"]:
         return await show_live_link_channels_handler(bot, message)
     elif query in [get_string("series_btn", lang), "/series"]:

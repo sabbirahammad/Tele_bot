@@ -220,7 +220,8 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
                 [get_string("cat_btn", lang), get_string("movie_btn", lang)],
                 [get_string("live_btn", lang), get_string("porn_btn", lang)],
                 [get_string("wc_btn", lang), get_string("apk_btn", lang)],
-                [get_string("buy_btn", lang), get_string("series_btn", lang)]
+                [get_string("buy_btn", lang), get_string("series_btn", lang)],
+                [get_string("invite_earn_btn", lang)]
             ],
             resize_keyboard=True, # বাটনগুলো সাইজ মতো ছোট দেখাবে
             is_persistent=True,   # বাটনগুলো সবসময় ইনপুট ফিল্ডের নিচে থাকবে
@@ -251,8 +252,7 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
                 InlineKeyboardButton(get_string("series_btn", lang), callback_data="show_web_series_channels"),
             ],
             [
-                InlineKeyboardButton("👥 রেফারেল সিস্টেম", callback_data="referral_stats"),
-                InlineKeyboardButton("💳 উইথড্র", callback_data="withdraw_info"),
+                InlineKeyboardButton(get_string("invite_earn_btn", lang), callback_data="invite_earn_menu"),
             ],
             [
                 InlineKeyboardButton(get_string("channel_btn", lang), url=os.getenv("CHANNEL_LINK", "https://t.me/YourChannelUsername")),
