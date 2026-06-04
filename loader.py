@@ -9,7 +9,7 @@ API_HASH = os.getenv("API_HASH", "")
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 
 # GPLinks API Token
-GPLINKS_API = os.getenv("GPLINKS_API", "c6c60266f958ad52b6999f348e63d1f2bc6fc629")
+GPLINKS_API = os.getenv("GPLINKS_API")
 
 # Bot Client: ইউজারদের সাথে কথা বলার জন্য
 bot = Client(

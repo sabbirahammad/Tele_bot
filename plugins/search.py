@@ -178,10 +178,12 @@ async def get_shortlink(url):
     
     payload = {
         "api": GPLINKS_API,
-        "url": encoded_url,
+        "url": url, # aiohttp params will handle encoding
         "format": "text"
     }
-    headers = {"User-Agent": "Mozilla/5.0"}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
     try:
         async with aiohttp.ClientSession(headers=headers) as session:
             async with session.get(api_url, params=payload) as response:
@@ -189,9 +191,9 @@ async def get_shortlink(url):
                 if response.status == 200 and short_url.startswith("http"):
                     return short_url.strip()
                 else:
-                    print(f"Error: GPLinks API returned status {response.status}")
+                    logger.error(f"GPLinks Error: Status {response.status}, Response: {short_url}")
     except Exception as e:
-        print(f"Error shortening link: {e}")
+        logger.exception(f"Error shortening link: {e}")
     # Return None instead of the original URL to prevent bypass
     return None
 
