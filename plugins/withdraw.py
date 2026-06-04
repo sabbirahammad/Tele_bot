@@ -172,6 +172,7 @@ async def wallet_input_handler(bot, message):
     lang = message.from_user.language_code
     state = get_user_state(message.from_user.id)
     if not state or not (state.startswith("awaiting_wallet_") or state.startswith("awaiting_bkash_")):
+        return
     parts = state.split("_")
     method = parts[1]
     currency = parts[2]
