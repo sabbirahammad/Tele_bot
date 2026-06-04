@@ -3,8 +3,8 @@ import asyncio
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery # নতুন ইম্পোর্ট
-from loader import user, bot # User ক্লায়েন্ট ইম্পোর্ট, bot ক্লায়েন্টও লাগবে
-from database import count_channel_files, count_users, get_all_users, add_channel, del_channel, count_active_channels
+from loader import user, bot
+from database import count_channel_files, count_users, get_all_users, add_channel, del_channel, count_active_channels, get_pending_withdraw_requests, update_withdraw_request_status, get_withdraw_request_details, credit_user_balance
 
 ADMINS = [int(id) for id in os.getenv("ADMIN_ID", "0").split()]
 
@@ -185,3 +185,84 @@ async def auto_crawl_handler(bot, message):
     
     from plugins.search import trigger_deep_crawl
     await trigger_deep_crawl(query)
+
+@Client.on_message(filters.command("withdraw_requests") & filters.user(ADMINS))
+async def show_withdraw_requests(bot, message):
+    requests = get_pending_withdraw_requests()
+    
+    if not requests:
+        return await message.reply_text("✅ বর্তমানে কোনো পেন্ডিং উইথড্র রিকোয়েস্ট নেই।")
+    
+    for req in requests:
+        req_id, user_id, amount, currency, wallet, date = req
+        
+        # ইউজারের তথ্য আনার চেষ্টা
+        try:
+            user_info = await bot.get_users(user_id)
+            user_mention = user_info.mention
+        except Exception:
+            user_mention = f"User ID: `{user_id}`"
+            
+        text = (
+            f"💰 **উইথড্র রিকোয়েস্ট #{req_id}**\n\n"
+            f"👤 ইউজার: {user_mention}\n"
+            f"💵 পরিমাণ: {amount} {currency}\n"
+            f"🏦 ওয়ালেট: `{wallet}`\n"
+            f"📅 তারিখ: {date}\n"
+            f"📊 স্ট্যাটাস: পেন্ডিং"
+        )
+        
+        buttons = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("✅ Approve", callback_data=f"approve_withdraw_{req_id}"),
+                InlineKeyboardButton("❌ Reject", callback_data=f"reject_withdraw_{req_id}")
+            ]
+        ])
+        await message.reply_text(text, reply_markup=buttons)
+
+@Client.on_callback_query(filters.regex("^approve_withdraw_") & filters.user(ADMINS))
+async def approve_withdraw_callback(bot, cb: CallbackQuery):
+    request_id = int(cb.data.split("_")[-1])
+    
+    req_details = get_withdraw_request_details(request_id)
+    if not req_details:
+        return await cb.answer("❌ রিকোয়েস্ট খুঁজে পাওয়া যায়নি।", show_alert=True)
+    
+    user_id, amount, currency, wallet, status = req_details
+    
+    if status != 'pending':
+        return await cb.answer(f"❌ এই রিকোয়েস্টটি ইতিমধ্যেই {status} করা হয়েছে।", show_alert=True)
+        
+    update_withdraw_request_status(request_id, 'approved')
+    
+    await cb.message.edit_text(f"✅ উইথড্র রিকোয়েস্ট #{request_id} **Approve** করা হয়েছে।")
+    await cb.answer("রিকোয়েস্ট Approve করা হয়েছে।")
+    
+    # ইউজারকে জানানো
+    try:
+        await bot.send_message(user_id, f"✅ আপনার **{amount} {currency}** উইথড্র রিকোয়েস্ট Approve করা হয়েছে।\nআপনার ওয়ালেটে টাকা পাঠানো হবে শীঘ্রই।")
+    except Exception: pass
+
+@Client.on_callback_query(filters.regex("^reject_withdraw_") & filters.user(ADMINS))
+async def reject_withdraw_callback(bot, cb: CallbackQuery):
+    request_id = int(cb.data.split("_")[-1])
+    
+    req_details = get_withdraw_request_details(request_id)
+    if not req_details:
+        return await cb.answer("❌ রিকোয়েস্ট খুঁজে পাওয়া যায়নি।", show_alert=True)
+    
+    user_id, amount, currency, wallet, status = req_details
+    
+    if status != 'pending':
+        return await cb.answer(f"❌ এই রিকোয়েস্টটি ইতিমধ্যেই {status} করা হয়েছে।", show_alert=True)
+        
+    update_withdraw_request_status(request_id, 'rejected')
+    credit_user_balance(user_id, amount, currency) # ব্যালেন্স ফেরত দেওয়া
+    
+    await cb.message.edit_text(f"❌ উইথড্র রিকোয়েস্ট #{request_id} **Reject** করা হয়েছে এবং **{amount} {currency}** ইউজারের ব্যালেন্সে ফেরত দেওয়া হয়েছে।")
+    await cb.answer("রিকোয়েস্ট Reject করা হয়েছে।")
+    
+    # ইউজারকে জানানো
+    try:
+        await bot.send_message(user_id, f"❌ দুঃখিত, আপনার **{amount} {currency}** উইথড্র রিকোয়েস্ট Reject করা হয়েছে।\nআপনার ব্যালেন্স ফেরত দেওয়া হয়েছে।")
+    except Exception: pass

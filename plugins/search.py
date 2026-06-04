@@ -8,7 +8,7 @@ import urllib.parse
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, ReplyKeyboardMarkup, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
-from database import search_files, get_files_by_channel, get_channel_name_by_id, get_unique_categories, get_channels_by_category, get_all_channels, search_channels_by_keywords, search_categories_by_keywords, is_user_verified, verify_user, get_channel_invite_link, increment_category_click
+from database import search_files, get_files_by_channel, get_channel_name_by_id, get_unique_categories, get_channels_by_category, get_all_channels, search_channels_by_keywords, search_categories_by_keywords, is_user_verified, verify_user, get_channel_invite_link, increment_category_click, give_daily_activity_reward
 from loader import GPLINKS_API, user, bot
 from translation import get_string
 # সার্চ রেজাল্ট পেজিনেশন হ্যান্ডেল করার জন্য মেমোরি ক্যাশ
@@ -275,6 +275,14 @@ async def search(bot, message):
         return await show_porn_categories_from_message(bot, message)
     elif query in [get_string("wc_btn", lang), "/worldcup"]:
         return await show_world_cup_info_handler(bot, message)
+
+    # ডেইলি রিওয়ার্ড চেক
+    rewarded, inviter_id = give_daily_activity_reward(message.from_user.id)
+    if rewarded:
+        await message.reply_text("🎁 আজকের প্রথম সার্চের জন্য আপনি **0.0133 AGO** রিওয়ার্ড পেয়েছেন!")
+        if inviter_id:
+            try: await bot.send_message(inviter_id, "📈 আপনার একজন রেফারেল আজ সার্চ করেছে, আপনি **0.0133 AGO** পেয়েছেন!")
+            except: pass
 
     wait_msg = await message.reply_text(get_string("searching", lang))
     results = search_files(query)

@@ -17,6 +17,8 @@ def get_today_date_str():
 def init_db():
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
+        # হাই লোড হ্যান্ডেল করার জন্য WAL মোড এনাবেল করা
+        cursor.execute("PRAGMA journal_mode=WAL")
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id INTEGER PRIMARY KEY,
@@ -40,6 +42,37 @@ def init_db():
                 cursor.execute("UPDATE users SET registration_date = COALESCE(last_verified_date, ?)", (get_today_date_str(),))
             except sqlite3.OperationalError:
                 pass
+        
+        if "current_state" not in users_columns:
+            try: cursor.execute("ALTER TABLE users ADD COLUMN current_state TEXT")
+            except sqlite3.OperationalError: pass
+
+        # ব্যালেন্স কলাম আপডেট এবং উইথড্র টেবিল
+        if "coin_balance" not in users_columns:
+            try:
+                # যদি আগের নাম থাকে তবে রিনেম করবে, না থাকলে নতুন তৈরি করবে
+                if "ton_balance" in users_columns:
+                    cursor.execute("ALTER TABLE users RENAME COLUMN ton_balance TO coin_balance")
+                    cursor.execute("ALTER TABLE users RENAME COLUMN ago_balance TO fly_balance")
+                else:
+                    cursor.execute("ALTER TABLE users ADD COLUMN referred_by INTEGER")
+                    cursor.execute("ALTER TABLE users ADD COLUMN coin_balance REAL DEFAULT 0.0")
+                    cursor.execute("ALTER TABLE users ADD COLUMN fly_balance REAL DEFAULT 0.0")
+                    cursor.execute("ALTER TABLE users ADD COLUMN last_reward_date TEXT")
+            except sqlite3.OperationalError:
+                pass
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS withdraw_requests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                amount REAL,
+                currency TEXT,
+                wallet TEXT,
+                status TEXT DEFAULT 'pending',
+                date TEXT
+            )
+        """)
                 
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS channel_files (
@@ -132,6 +165,140 @@ def init_db():
     # যদি আগে থেকে ডাটা থাকে, তবে FTS টেবিল পপুলেট করা (একবারই চলবে)
     sync_fts_index()
 
+def add_referral(user_id, inviter_id):
+    """নতুন ইউজারকে রেফারারের সাথে যুক্ত করা এবং রিওয়ার্ড দেওয়া"""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        # চেক করা যে ইউজার অলরেডি অন্য কারো দ্বারা রেফারড কি না
+        cursor.execute("SELECT referred_by FROM users WHERE user_id = ?", (user_id,))
+        row = cursor.fetchone()
+        if row and row[0] is None and user_id != inviter_id:
+            # রিওয়ার্ড ভ্যালু সেট করুন
+            coin_reward = 0.06
+            fly_reward = 0.138197
+            
+            # ইনভাইটারের ব্যালেন্স আপডেট
+            cursor.execute("""
+                UPDATE users 
+                SET coin_balance = coin_balance + ?, fly_balance = fly_balance + ?, referred_by = ?
+                WHERE user_id = ?
+            """, (coin_reward, fly_reward, inviter_id, user_id))
+            
+            # ইনভাইটার আইডি রিটার্ন করা যাতে নোটিফিকেশন পাঠানো যায়
+            cursor.execute("UPDATE users SET referred_by = ? WHERE user_id = ?", (inviter_id, user_id))
+            conn.commit()
+            return True
+    return False
+
+def count_referrals(user_id):
+    """ইউজার কতজনকে রেফার করেছে তার সংখ্যা রিটার্ন করে"""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM users WHERE referred_by = ?", (user_id,))
+        return cursor.fetchone()[0]
+
+def get_user_balances(user_id):
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT coin_balance, fly_balance, referred_by FROM users WHERE user_id = ?", (user_id,))
+        return cursor.fetchone()
+
+def give_daily_activity_reward(user_id):
+    """প্রতিদিন সার্চ করার জন্য রিওয়ার্ড দেওয়া"""
+    today = get_today_date_str()
+    fly_reward = 0.013361
+    
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT last_reward_date, referred_by FROM users WHERE user_id = ?", (user_id,))
+        row = cursor.fetchone()
+        
+        if row and row[0] != today:
+            # ইউজারকে রিওয়ার্ড দেওয়া
+            cursor.execute("UPDATE users SET fly_balance = fly_balance + ?, last_reward_date = ? WHERE user_id = ?", (fly_reward, today, user_id))
+            
+            # যদি ইনভাইটার থাকে তবে তাকেও দেওয়া
+            inviter_id = row[1]
+            if inviter_id:
+                cursor.execute("UPDATE users SET fly_balance = fly_balance + ? WHERE user_id = ?", (fly_reward, inviter_id))
+            
+            conn.commit()
+            return True, inviter_id
+    return False, None
+
+def create_withdraw_request(user_id, amount, currency, wallet):
+    today = get_today_date_str()
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        # ব্যালেন্স চেক এবং ডিডাকশন
+        balance_col = "coin_balance" if currency == "Coin" else "fly_balance"
+        cursor.execute(f"SELECT {balance_col} FROM users WHERE user_id = ?", (user_id,))
+        current_balance = cursor.fetchone()[0]
+        
+        if current_balance >= amount:
+            cursor.execute(f"UPDATE users SET {balance_col} = {balance_col} - ? WHERE user_id = ?", (amount, user_id))
+            cursor.execute("""
+                INSERT INTO withdraw_requests (user_id, amount, currency, wallet, date)
+                VALUES (?, ?, ?, ?, ?)
+            """, (user_id, amount, currency, wallet, today))
+            conn.commit()
+            return True
+    return False
+
+def get_user_withdraw_history(user_id):
+    def get_user_withdraw_history(user_id, offset=0, limit=5):
+        """ইউজারের উইথড্র হিস্ট্রি রিটার্ন করে (পেজিনেশন সহ)"""
+        with sqlite3.connect(DB_PATH) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT amount, currency, status, date FROM withdraw_requests WHERE user_id = ? ORDER BY id DESC LIMIT ? OFFSET ?", (user_id, limit, offset))
+            history_items = cursor.fetchall()
+            cursor.execute("SELECT COUNT(*) FROM withdraw_requests WHERE user_id = ?", (user_id,))
+            total_count = cursor.fetchone()[0]
+            return history_items, total_count
+
+def update_user_state(user_id, state):
+    """ইউজারের বর্তমান স্টেট আপডেট করা"""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET current_state = ? WHERE user_id = ?", (state, user_id))
+        conn.commit()
+
+def get_user_state(user_id):
+    """ইউজারের বর্তমান স্টেট চেক করা"""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT current_state FROM users WHERE user_id = ?", (user_id,))
+        row = cursor.fetchone()
+        return row[0] if row else None
+
+def get_pending_withdraw_requests():
+    """সব পেন্ডিং উইথড্র রিকোয়েস্ট রিটার্ন করে"""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, user_id, amount, currency, wallet, date FROM withdraw_requests WHERE status = 'pending'")
+        return cursor.fetchall()
+
+def update_withdraw_request_status(request_id, status):
+    """একটি উইথড্র রিকোয়েস্টের স্ট্যাটাস আপডেট করে"""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE withdraw_requests SET status = ? WHERE id = ?", (status, request_id))
+        conn.commit()
+
+def get_withdraw_request_details(request_id):
+    """একটি নির্দিষ্ট উইথড্র রিকোয়েস্টের বিস্তারিত তথ্য রিটার্ন করে"""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT user_id, amount, currency, wallet, status FROM withdraw_requests WHERE id = ?", (request_id,))
+        return cursor.fetchone()
+
+def credit_user_balance(user_id, amount, currency):
+    """ইউজারের ব্যালেন্সে টাকা ফেরত দেয় (যেমন: রিকোয়েস্ট রিজেক্ট হলে)"""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        balance_col = "coin_balance" if currency == "Coin" else "fly_balance"
+        cursor.execute(f"UPDATE users SET {balance_col} = {balance_col} + ? WHERE user_id = ?", (amount, user_id))
+        conn.commit()
 
 def add_user(user_id, username):
     today = get_today_date_str()
