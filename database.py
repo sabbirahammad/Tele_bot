@@ -245,16 +245,15 @@ def create_withdraw_request(user_id, amount, currency, wallet):
             return True
     return False
 
-def get_user_withdraw_history(user_id):
-    def get_user_withdraw_history(user_id, offset=0, limit=5):
-        """ইউজারের উইথড্র হিস্ট্রি রিটার্ন করে (পেজিনেশন সহ)"""
-        with sqlite3.connect(DB_PATH) as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT amount, currency, status, date FROM withdraw_requests WHERE user_id = ? ORDER BY id DESC LIMIT ? OFFSET ?", (user_id, limit, offset))
-            history_items = cursor.fetchall()
-            cursor.execute("SELECT COUNT(*) FROM withdraw_requests WHERE user_id = ?", (user_id,))
-            total_count = cursor.fetchone()[0]
-            return history_items, total_count
+def get_user_withdraw_history(user_id, offset=0, limit=5):
+    """ইউজারের উইথড্র হিস্ট্রি রিটার্ন করে (পেজিনেশন সহ)"""
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT amount, currency, status, date FROM withdraw_requests WHERE user_id = ? ORDER BY id DESC LIMIT ? OFFSET ?", (user_id, limit, offset))
+        history_items = cursor.fetchall()
+        cursor.execute("SELECT COUNT(*) FROM withdraw_requests WHERE user_id = ?", (user_id,))
+        total_count = cursor.fetchone()[0]
+        return history_items, total_count
 
 def update_user_state(user_id, state):
     """ইউজারের বর্তমান স্টেট আপডেট করা"""
