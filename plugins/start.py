@@ -116,6 +116,12 @@ async def start_handler(bot, message):    # অ্যাড দেখে ফি�
                             except Exception:
                                 pass
 
+                        # Peer resolution safety: Ensure bot/user knows the peer
+                        try:
+                            await bot.get_chat(ch_id)
+                        except Exception:
+                            pass
+
                         try:
                             # 1. First try to copy directly with the bot
                             sent_msg = await bot.copy_message(

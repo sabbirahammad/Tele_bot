@@ -42,6 +42,12 @@ async def start_services():
         try:
             await user.start()
             logging.info("--- User Client (Your ID) Started ---")
+            
+            # Peer ID Invalid এরর এড়াতে সব ডায়ালগ একবার ফেচ করে ক্যাশ পপুলেট করা
+            logging.info("Populating peer cache for User Client... please wait.")
+            async for _ in user.get_dialogs():
+                pass
+            logging.info("Peer cache populated successfully.")
         except Exception as e:
             logging.error(f"❌ User Client failed to start: {str(e)}")
             logging.warning("Please check if your STRING_SESSION is valid and complete.")
